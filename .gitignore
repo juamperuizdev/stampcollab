@@ -1,0 +1,37 @@
+#-------------------------
+# Temporary Files
+#-------------------------
+/writable/cache/*
+!/writable/cache/index.html
+
+/writable/logs/*
+!/writable/logs/index.html
+
+/writable/session/*
+!/writable/session/index.html
+
+/writable/uploads/*
+!/writable/uploads/index.html
+
+/writable/debugbar/*
+!/writable/debugbar/index.html
+
+php_errors.log
+
+# Visual Studio Code
+.vscode/
+
+/results/
+/phpunit.xml
+
+# Propios del proyecto
+AGENTS.md
+.claude
+.htaccess
+.env
+
+cgi-bin/*
+documents/*
+!documents/index.html
+
+public/.htaccess

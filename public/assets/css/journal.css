@@ -91,7 +91,7 @@ body {
     filter: drop-shadow(0 10px 40px rgba(0, 0, 0, 0.55)) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.25));
 }
 
-/* --- Página individual --- */
+/* --- Página individual + hojas apiladas via box-shadow --- */
 .journal-page {
     background-color: #fff;
     flex: 1;
@@ -100,68 +100,26 @@ body {
     z-index: 0;
 }
 
-/* --- Hojas apiladas izquierda (solo borde izquierdo) --- */
-.journal-left::before,
-.journal-left::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    background: #f5f5f5;
-    border: 1px solid #ddd;
-    border-right: none;
-    border-radius: 3px 0 0 3px;
-    z-index: -1;
-}
-
-.journal-left::before {
-    left: -5px;
-    width: 5px;
-    box-shadow: -1px 1px 3px rgba(0, 0, 0, 0.12);
-}
-
-.journal-left::after {
-    left: -9px;
-    width: 5px;
-    box-shadow: -1px 1px 4px rgba(0, 0, 0, 0.08);
-}
-
-/* --- Hojas apiladas derecha (solo borde derecho) --- */
-.journal-right::before,
-.journal-right::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    background: #f5f5f5;
-    border: 1px solid #ddd;
-    border-left: none;
-    border-radius: 0 3px 3px 0;
-    z-index: -1;
-}
-
-.journal-right::before {
-    right: -5px;
-    width: 5px;
-    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.12);
-}
-
-.journal-right::after {
-    right: -9px;
-    width: 5px;
-    box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.08);
-}
-
 .journal-left {
     border-radius: 2px 0 0 2px;
+    box-shadow:
+        -4px 0 0 0 #f5f5f5,
+        -4px 0 0 1px #ddd,
+        -8px 0 0 0 #f0f0f0,
+        -8px 0 0 1px #ddd;
 }
 
 .journal-right {
     border-radius: 0 2px 2px 0;
+    box-shadow:
+        4px 0 0 0 #f5f5f5,
+        4px 0 0 1px #ddd,
+        8px 0 0 0 #f0f0f0,
+        8px 0 0 1px #ddd;
 }
 
-/* --- Patrón de puntos moleskine (sobre el grid) --- */
-.page-grid::before {
+/* --- Patrón de puntos moleskine (toda la página) --- */
+.journal-page::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -195,8 +153,8 @@ body {
 
 /* --- Celda individual (proporción sello real 21mm x 25mm = 21:25) --- */
 .grid-cell {
-    background-color: #f1f1f1;
-    border-radius: 3px;
+    background-color: rgba(241, 241, 241, 0.5);
+    border-radius: 0;
     cursor: pointer;
     position: relative;
     z-index: 1;
@@ -256,10 +214,20 @@ body {
 
     .journal-left {
         border-radius: 2px 2px 0 0;
+        box-shadow:
+            0 -4px 0 0 #f5f5f5,
+            0 -4px 0 1px #ddd,
+            0 -8px 0 0 #f0f0f0,
+            0 -8px 0 1px #ddd;
     }
 
     .journal-right {
         border-radius: 0 0 2px 2px;
+        box-shadow:
+            0 4px 0 0 #f5f5f5,
+            0 4px 0 1px #ddd,
+            0 8px 0 0 #f0f0f0,
+            0 8px 0 1px #ddd;
     }
 
     .journal-spine {

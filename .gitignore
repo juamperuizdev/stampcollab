@@ -35,3 +35,6 @@ documents/*
 !documents/index.html
 
 public/.htaccess
+
+public/uploads/*
+!public/uploads/index.html

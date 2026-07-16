@@ -27,29 +27,120 @@
 
     <main class="journal-container">
 
-        <div class="journal-spread">
-            <div class="journal-page journal-left">
-                <div class="page-grid">
-                    <?php for ($i = 1; $i <= 25; $i++): ?>
-                        <div class="grid-cell" data-cell="<?= $i ?>">
-                            <span class="cell-number"><?= $i ?></span>
-                        </div>
-                    <?php endfor; ?>
-                </div>
+        <div class="journal-spread" id="journalSpread" data-page="<?= $page ?>">
+
+            <button class="page-corner page-corner-prev <?= $page <= 1 ? 'hidden' : '' ?>"
+                    id="btnPrev" title="Página anterior">
+                <span class="corner-icon">&#9664;</span>
+            </button>
+
+            <div id="gridContainer">
+                <?= $this->render('partials/cells', ['page' => $page, 'start' => $start, 'end' => $end]) ?>
             </div>
-            <div class="journal-spine"></div>
-            <div class="journal-page journal-right">
-                <div class="page-grid">
-                    <?php for ($i = 26; $i <= 50; $i++): ?>
-                        <div class="grid-cell" data-cell="<?= $i ?>">
-                            <span class="cell-number"><?= $i ?></span>
-                        </div>
-                    <?php endfor; ?>
-                </div>
-            </div>
+
+            <!-- Hoja que gira durante la animación -->
+            <div class="page-flip" id="pageFlip"></div>
+
+            <button class="page-corner page-corner-next" id="btnNext" title="Siguiente página">
+                <span class="corner-icon">&#9654;</span>
+            </button>
+
+        </div>
+
+        <div class="page-indicator" id="pageIndicator">
+            <span><?= $start ?> - <?= $end ?></span>
         </div>
         
     </main>
+
+    <script>
+    (function() {
+        var spread = document.getElementById('journalSpread');
+        var container = document.getElementById('gridContainer');
+        var indicator = document.getElementById('pageIndicator');
+        var btnPrev = document.getElementById('btnPrev');
+        var btnNext = document.getElementById('btnNext');
+        var flip = document.getElementById('pageFlip');
+        var currentPage = parseInt(spread.dataset.page);
+        var loading = false;
+        var baseUrl = '<?= base_url('api/cells/') ?>';
+
+        function loadPage(newPage, direction) {
+            if (loading) return;
+            loading = true;
+
+            // Deshabilitar botones
+            btnPrev.disabled = true;
+            btnNext.disabled = true;
+
+            // Posicionar la hoja que gira
+            flip.className = 'page-flip';
+
+            if (direction === 'next') {
+                // Gira desde la derecha hacia la izquierda (eje = lomo)
+                flip.style.left = '50%';
+                flip.style.right = '0';
+                flip.style.top = '0';
+                flip.style.bottom = '0';
+                flip.style.transformOrigin = 'left center';
+
+                // Forzar reflow, luego activar animación
+                void flip.offsetWidth;
+                flip.classList.add('flipping-next');
+
+            } else {
+                // Gira desde la izquierda hacia la derecha (eje = lomo)
+                flip.style.left = '0';
+                flip.style.right = '50%';
+                flip.style.top = '0';
+                flip.style.bottom = '0';
+                flip.style.transformOrigin = 'right center';
+
+                void flip.offsetWidth;
+                flip.classList.add('flipping-prev');
+            }
+
+            // A mitad de la animación (cuando la hoja está vertical), cambiar contenido
+            setTimeout(function() {
+                fetch(baseUrl + newPage)
+                    .then(function(r) { return r.text(); })
+                    .then(function(html) {
+                        container.innerHTML = html;
+                        currentPage = newPage;
+                        spread.dataset.page = currentPage;
+
+                        var start = (currentPage - 1) * 50 + 1;
+                        var end = start + 49;
+                        indicator.innerHTML = '<span>' + start + ' - ' + end + '</span>';
+                        btnPrev.classList.toggle('hidden', currentPage <= 1);
+                    })
+                    .catch(function() {
+                        flip.className = 'page-flip';
+                        loading = false;
+                        btnPrev.disabled = false;
+                        btnNext.disabled = false;
+                    });
+            }, 450);
+
+            // Al terminar la animación, limpiar
+            setTimeout(function() {
+                flip.className = 'page-flip';
+                loading = false;
+                btnPrev.disabled = false;
+                btnNext.disabled = false;
+            }, 900);
+        }
+
+        btnPrev.addEventListener('click', function() {
+            if (currentPage > 1) loadPage(currentPage - 1, 'prev');
+        });
+
+        btnNext.addEventListener('click', function() {
+            loadPage(currentPage + 1, 'next');
+        });
+
+    })();
+    </script>
 
 </body>
 </html>

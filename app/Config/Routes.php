@@ -3,6 +3,10 @@
 use CodeIgniter\Router\RouteCollection;
 
 /** @var RouteCollection $routes */
+
+// Carga la página inicial
 $routes->get('/', 'Home::index');
-$routes->get('page/(:num)', 'Home::index/$1');
-$routes->get('api/cells/(:num)', 'Home::cells/$1');
+
+// Carga de páginas por javascript
+$routes->get('page/(:num)', 'Page::getPage/$1');
+$routes->get('api/cells/(:num)', 'Page::cells/$1');

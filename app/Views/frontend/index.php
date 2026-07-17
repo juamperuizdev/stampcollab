@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?? 'StampCollab' ?></title>
-    <link rel="shortcut icon" type="image/webp" href="/assets/logo/stampcollab.webp">
+    <!--<link rel="shortcut icon" type="image/webp" href="/assets/logo/stampcollab.webp">-->
 
     <!-- Bulma CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
@@ -52,6 +52,10 @@
         
     </main>
 
+    <script>
+        var STAMP_ALLOWED_FORMATS = <?= json_encode(STAMP_ALLOWED_FORMATS) ?>;
+        var STAMP_CROP_RATIO = { w: 21, h: 25 };
+    </script>
     <script src="<?= base_url('public/assets/js/journal.js') ?>"></script>
 
 </body>

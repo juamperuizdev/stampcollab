@@ -424,3 +424,149 @@ body {
         padding: 0.5rem;
     }
 }
+
+/* --- Overlay de recorte --- */
+.crop-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+}
+
+.crop-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    touch-action: none;
+}
+
+.crop-image {
+    position: absolute;
+    transform-origin: 0 0;
+    pointer-events: none;
+    max-width: none;
+}
+
+.crop-frame {
+    position: absolute;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.crop-frame::before,
+.crop-frame::after {
+    content: '';
+    position: absolute;
+    background: rgba(255, 255, 255, 0.35);
+}
+
+/* Guía tercios horizontal */
+.crop-frame::before {
+    top: 33.33%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    box-shadow: 0 calc(33.33cqh) 0 0 rgba(255, 255, 255, 0.35);
+}
+
+/* Guía tercios vertical */
+.crop-frame::after {
+    left: 33.33%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    box-shadow: calc(33.33cqw) 0 0 0 rgba(255, 255, 255, 0.35);
+}
+
+.crop-controls {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    z-index: 2;
+}
+
+.crop-btn {
+    padding: 0.6rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.crop-btn:active {
+    transform: scale(0.96);
+}
+
+.crop-btn-apply {
+    background: #27ae60;
+    color: #fff;
+}
+
+.crop-btn-apply:hover {
+    background: #219a52;
+}
+
+.crop-btn-cancel {
+    background: #555;
+    color: #fff;
+}
+
+.crop-btn-cancel:hover {
+    background: #666;
+}
+
+.crop-zoom-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.crop-zoom-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.crop-zoom-btn:hover {
+    background: rgba(255, 255, 255, 0.35);
+}
+
+/* Celda con imagen */
+.grid-cell .cell-number {
+    transition: opacity 0.2s;
+}
+
+.grid-cell.has-image .cell-number {
+    display: none;
+}
+
+.grid-cell img.cell-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0;
+    pointer-events: none;
+}

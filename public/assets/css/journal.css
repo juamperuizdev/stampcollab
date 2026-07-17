@@ -469,23 +469,7 @@ body {
     background: rgba(255, 255, 255, 0.35);
 }
 
-/* Guía tercios horizontal */
-.crop-frame::before {
-    top: 33.33%;
-    left: 0;
-    right: 0;
-    height: 1px;
-    box-shadow: 0 calc(33.33cqh) 0 0 rgba(255, 255, 255, 0.35);
-}
 
-/* Guía tercios vertical */
-.crop-frame::after {
-    left: 33.33%;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    box-shadow: calc(33.33cqw) 0 0 0 rgba(255, 255, 255, 0.35);
-}
 
 .crop-controls {
     margin-top: 1.5rem;

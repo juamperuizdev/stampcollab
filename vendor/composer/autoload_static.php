@@ -50,8 +50,18 @@ class ComposerStaticInitf5cce40800fa5dae1504b9364f585e6a
     );
 
     public static $classMap = array (
+        'App\\Controllers\\Backend\\Administrators' => __DIR__ . '/../..' . '/app/Controllers/Backend/Administrators.php',
+        'App\\Controllers\\Backend\\Auth' => __DIR__ . '/../..' . '/app/Controllers/Backend/Auth.php',
+        'App\\Controllers\\Backend\\Dashboard' => __DIR__ . '/../..' . '/app/Controllers/Backend/Dashboard.php',
+        'App\\Controllers\\Backend\\Journals' => __DIR__ . '/../..' . '/app/Controllers/Backend/Journals.php',
+        'App\\Controllers\\Backend\\Stamps' => __DIR__ . '/../..' . '/app/Controllers/Backend/Stamps.php',
         'App\\Controllers\\BaseController' => __DIR__ . '/../..' . '/app/Controllers/BaseController.php',
         'App\\Controllers\\Home' => __DIR__ . '/../..' . '/app/Controllers/Home.php',
+        'App\\Controllers\\Page' => __DIR__ . '/../..' . '/app/Controllers/Page.php',
+        'App\\Filters\\AuthFilter' => __DIR__ . '/../..' . '/app/Filters/AuthFilter.php',
+        'App\\Models\\AdministratorModel' => __DIR__ . '/../..' . '/app/Models/AdministratorModel.php',
+        'App\\Models\\JournalModel' => __DIR__ . '/../..' . '/app/Models/JournalModel.php',
+        'App\\Models\\StampModel' => __DIR__ . '/../..' . '/app/Models/StampModel.php',
         'CodeIgniter\\API\\ApiException' => __DIR__ . '/..' . '/codeigniter4/framework/system/API/ApiException.php',
         'CodeIgniter\\API\\BaseTransformer' => __DIR__ . '/..' . '/codeigniter4/framework/system/API/BaseTransformer.php',
         'CodeIgniter\\API\\ResponseTrait' => __DIR__ . '/..' . '/codeigniter4/framework/system/API/ResponseTrait.php',

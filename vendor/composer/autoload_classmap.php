@@ -6,8 +6,18 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Controllers\\Backend\\Administrators' => $baseDir . '/app/Controllers/Backend/Administrators.php',
+    'App\\Controllers\\Backend\\Auth' => $baseDir . '/app/Controllers/Backend/Auth.php',
+    'App\\Controllers\\Backend\\Dashboard' => $baseDir . '/app/Controllers/Backend/Dashboard.php',
+    'App\\Controllers\\Backend\\Journals' => $baseDir . '/app/Controllers/Backend/Journals.php',
+    'App\\Controllers\\Backend\\Stamps' => $baseDir . '/app/Controllers/Backend/Stamps.php',
     'App\\Controllers\\BaseController' => $baseDir . '/app/Controllers/BaseController.php',
     'App\\Controllers\\Home' => $baseDir . '/app/Controllers/Home.php',
+    'App\\Controllers\\Page' => $baseDir . '/app/Controllers/Page.php',
+    'App\\Filters\\AuthFilter' => $baseDir . '/app/Filters/AuthFilter.php',
+    'App\\Models\\AdministratorModel' => $baseDir . '/app/Models/AdministratorModel.php',
+    'App\\Models\\JournalModel' => $baseDir . '/app/Models/JournalModel.php',
+    'App\\Models\\StampModel' => $baseDir . '/app/Models/StampModel.php',
     'CodeIgniter\\API\\ApiException' => $vendorDir . '/codeigniter4/framework/system/API/ApiException.php',
     'CodeIgniter\\API\\BaseTransformer' => $vendorDir . '/codeigniter4/framework/system/API/BaseTransformer.php',
     'CodeIgniter\\API\\ResponseTrait' => $vendorDir . '/codeigniter4/framework/system/API/ResponseTrait.php',

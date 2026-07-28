@@ -11,6 +11,8 @@ $routes->group('admin', static function ($routes) {
     $routes->get('/', 'Backend\Auth::login');
 
     $routes->post('administrators/(:num)/toggle-status', 'Backend\Administrators::toggleStatus/$1');
+    
+    // Routes for CRUD operations
     $routes->resource('administrators', ['controller' => 'Backend\Administrators']);
     $routes->resource('journals', ['controller' => 'Backend\Journals']);
     $routes->resource('stamps', ['controller' => 'Backend\Stamps']);

@@ -1,103 +1,100 @@
 <?php
 
 namespace App\Controllers\Backend;
-
 use App\Controllers\BaseController;
-use CodeIgniter\HTTP\RequestInterface;
-use CodeIgniter\HTTP\ResponseInterface;
-use Psr\Log\LoggerInterface;
 
-class Journals extends BaseController
-{
-    protected $model;
+class Journals extends BaseController {
 
-    protected function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
-    {
-        parent::initController($request, $response, $logger);
-        $this->model = model('JournalModel');
-    }
-
-    public function index(): string
-    {
+    /**
+     * Display a listing of journals
+     * @author Juampe Ruiz
+     */
+    public function index(): string {
         $data = [
             'title'    => 'Journals',
-            'journals' => $this->model->orderBy('id', 'ASC')->findAll(),
+            'journals' => (new \App\Models\JournalModel())->orderBy('id', 'DESC')->findAll(),
         ];
-
-        return view('backend/layouts/header', $data)
-             . view('backend/journals/index')
-             . view('backend/layouts/footer');
+        return view('backend/layouts/header', $data) . view('backend/journals/index') . view('backend/layouts/footer');
     }
 
-    public function new(): string
-    {
+    /**
+     * Show the form for creating a new journal
+     * @author Juampe Ruiz
+     * @version 1.0
+     */
+    public function new(): string {
+        $data = ['title' => 'Nuevo journal'];
+        return view('backend/layouts/header', $data) . view('backend/journals/form') . view('backend/layouts/footer');
+    }
+
+    /**
+     * Show the form for editing a journal
+     * @author Juampe Ruiz
+     * @version 1.0
+     */
+    public function edit(int $id): string {
         $data = [
-            'title' => 'Nuevo journal',
+            'title'   => 'Editar journal',
+            'journal' => (new \App\Models\JournalModel())->where('id', $id)->first()
         ];
-
-        return view('backend/layouts/header', $data)
-             . view('backend/journals/form')
-             . view('backend/layouts/footer');
+        return view('backend/layouts/header', $data) . view('backend/journals/form') . view('backend/layouts/footer');
     }
 
-    public function create()
-    {
+    /**
+     * Create a new journal
+     * @author Juampe Ruiz
+     * @version 1.0
+     */
+    public function create() {
+
         $rules = [
-            'slug' => 'required|alpha_dash|is_unique[journal.slug]',
             'name' => 'required|max_length[100]',
         ];
 
-        if (! $this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
-        }
+        if (!$this->validate($rules)) { return redirect()->back()->withInput()->with('errors', $this->validator->getErrors()); }
 
-        $this->model->save([
-            'slug'        => $this->request->getPost('slug'),
+        (new \App\Models\JournalModel())->save([
+            'slug'        => mb_url_title($this->request->getPost('name'), '-', true),
             'name'        => $this->request->getPost('name'),
             'description' => $this->request->getPost('description'),
             'status'      => $this->request->getPost('status') ?? 'HIDDEN',
         ]);
 
-        return redirect()->to('/admin/journals')->with('success', 'Journal creado.');
+        return redirect()->to('admin/journals/')->with('success', 'Journal creado');
     }
-
-    public function edit($id): string
-    {
-        $data = [
-            'title'   => 'Editar journal',
-            'journal' => $this->model->find($id),
-        ];
-
-        return view('backend/layouts/header', $data)
-             . view('backend/journals/form')
-             . view('backend/layouts/footer');
-    }
-
-    public function update($id)
-    {
+    
+    /**
+     * Update a journal
+     * @author Juampe Ruiz
+     * @version 1.0
+     */
+    public function update(int $id) {
         $rules = [
             'slug' => "required|alpha_dash|is_unique[journal.slug,id,{$id}]",
             'name' => 'required|max_length[100]',
         ];
 
-        if (! $this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
-        }
+        if (!$this->validate($rules)) { return redirect()->back()->withInput()->with('errors', $this->validator->getErrors()); }
 
-        $this->model->save([
+        (new \App\Models\JournalModel())->save([
             'id'          => $id,
-            'slug'        => $this->request->getPost('slug'),
+            'slug'        => mb_url_title($this->request->getPost('name'), '-', true),
             'name'        => $this->request->getPost('name'),
             'description' => $this->request->getPost('description'),
             'status'      => $this->request->getPost('status') ?? 'HIDDEN',
         ]);
 
-        return redirect()->to('/admin/journals')->with('success', 'Journal actualizado.');
+        return redirect()->to('admin/journals/')->with('success', 'Journal actualizado');
     }
 
-    public function delete($id)
-    {
-        $this->model->delete($id);
-        return redirect()->to('/admin/journals')->with('success', 'Journal eliminado.');
+    /**
+     * Delete a journal
+     * @author Juampe Ruiz
+     * @version 1.0
+     */
+    public function delete(int $id) {
+        (new \App\Models\JournalModel())->delete($id);
+        return redirect()->to('admin/journals/')->with('success', 'Journal eliminado');
     }
+
 }

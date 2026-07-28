@@ -5,10 +5,20 @@ use App\Controllers\BaseController;
 
 class Auth extends BaseController {
 
+    /**
+     * Show backend login form
+     * @author Juampe Ruiz
+     * @version 1.0
+     */
     public function login(): string {
         return view('backend/auth/login');
     }
 
+    /**
+     * Try to login into backend
+     * @author Juampe Ruiz
+     * @version 1.0
+     */
     public function attemptLogin() {
 
         try {
@@ -30,9 +40,14 @@ class Auth extends BaseController {
         
     }
 
-    public function logout()
-    {
+    /**
+     * Logout from backend
+     * @author Juampe Ruiz
+     * @version 1.0
+     */
+    public function logout() {
         session()->destroy();
         return redirect()->to('admin/');
     }
+
 }

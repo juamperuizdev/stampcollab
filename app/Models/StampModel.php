@@ -21,7 +21,7 @@ class StampModel extends Model {
         'user_agent',
     ];
 
-    protected $useTimestamps = true;
+    protected $useTimestamps = false;
     protected $createdField  = 'created';
 
 }

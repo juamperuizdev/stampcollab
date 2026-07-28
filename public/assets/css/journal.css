@@ -545,6 +545,10 @@ body {
     display: none;
 }
 
+.grid-cell.has-image {
+    cursor: pointer;
+}
+
 .grid-cell img.cell-image {
     position: absolute;
     inset: 0;
@@ -553,4 +557,18 @@ body {
     object-fit: cover;
     border-radius: 0;
     pointer-events: none;
+}
+
+/* Estado de subida */
+.grid-cell.uploading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.grid-cell.uploading::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.6);
+    z-index: 2;
 }

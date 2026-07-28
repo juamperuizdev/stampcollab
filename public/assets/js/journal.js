@@ -1,21 +1,47 @@
 (function () {
 
     var spread = document.getElementById('journalSpread');
+    if (!spread) return;
+
     var container = document.getElementById('gridContainer');
     var indicator = document.getElementById('pageIndicator');
     var btnPrev = document.getElementById('btnPrev');
     var btnNext = document.getElementById('btnNext');
     var flip = document.getElementById('pageFlip');
     var currentPage = parseInt(spread.dataset.page);
+    var journalId = parseInt(spread.dataset.journalId);
+    var uploadUrl = null;
+    var allowedFormats = [];
+    var cropRatio = { w: 21, h: 25 };
+    var perSide = 25;
+    var totalPages = 1;
     var loading = false;
-    var baseUrl = 'page/';
+    var baseUrl = 'page/' + journalId + '/';
+
+    function setupFromData(data) {
+        if (data.upload_url) uploadUrl = data.upload_url;
+        if (data.allowed_formats) allowedFormats = data.allowed_formats;
+        if (data.crop_ratio) cropRatio = data.crop_ratio;
+        if (data.per_side) perSide = data.per_side;
+        if (data.pages) totalPages = data.pages;
+        if (fileInput && allowedFormats.length) {
+            fileInput.accept = allowedFormats.join(',');
+        }
+    }
 
     /* =========================================
        Construcción de grid
        ========================================= */
 
-    function buildGrid(start, end) {
-        var mid = start + 24;
+    function buildGrid(start, end, stamps) {
+        var stampMap = {};
+        if (stamps) {
+            for (var k = 0; k < stamps.length; k++) {
+                stampMap[stamps[k].number] = stamps[k];
+            }
+        }
+
+        var mid = Math.min(start + perSide - 1, end);
 
         var leftPage = document.createElement('div');
         leftPage.className = 'journal-page journal-left';
@@ -29,6 +55,7 @@
             span.className = 'cell-number';
             span.textContent = i;
             cell.appendChild(span);
+            addStampToCell(cell, stampMap[i]);
             leftGrid.appendChild(cell);
         }
         leftPage.appendChild(leftGrid);
@@ -48,6 +75,7 @@
             span2.className = 'cell-number';
             span2.textContent = j;
             cell2.appendChild(span2);
+            addStampToCell(cell2, stampMap[j]);
             rightGrid.appendChild(cell2);
         }
         rightPage.appendChild(rightGrid);
@@ -58,11 +86,23 @@
         container.appendChild(rightPage);
     }
 
+    function addStampToCell(cell, stamp) {
+        if (!stamp) return;
+        var img = document.createElement('img');
+        img.className = 'cell-image';
+        img.src = stamp.thumb_url;
+        img.alt = 'Sello ' + cell.dataset.cell;
+        cell.dataset.fullUrl = stamp.full_url;
+        cell.classList.add('has-image');
+        cell.appendChild(img);
+    }
+
     function applyPageData(data) {
         currentPage = data.page;
         spread.dataset.page = currentPage;
         indicator.innerHTML = '<span>' + data.start + ' - ' + data.end + '</span>';
         btnPrev.classList.toggle('hidden', currentPage <= 1);
+        btnNext.classList.toggle('hidden', currentPage >= totalPages);
     }
 
     /* =========================================
@@ -101,7 +141,8 @@
             fetch(baseUrl + newPage)
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
-                    buildGrid(data.start, data.end);
+                    setupFromData(data);
+                    buildGrid(data.start, data.end, data.stamps || []);
                     applyPageData(data);
                 })
                 .catch(function () {
@@ -132,7 +173,8 @@
         fetch(baseUrl + '1')
             .then(function (r) { return r.json(); })
             .then(function (data) {
-                buildGrid(data.start, data.end);
+                setupFromData(data);
+                buildGrid(data.start, data.end, data.stamps || []);
                 applyPageData(data);
             });
     }
@@ -145,7 +187,7 @@
 
     var fileInput = document.createElement('input');
     fileInput.type = 'file';
-    fileInput.accept = STAMP_ALLOWED_FORMATS.join(',');
+    fileInput.accept = 'image/*';
     fileInput.style.display = 'none';
     document.body.appendChild(fileInput);
 
@@ -155,7 +197,7 @@
         if (!fileInput.files.length || !activeCell) return;
         var file = fileInput.files[0];
 
-        if (STAMP_ALLOWED_FORMATS.indexOf(file.type) === -1) {
+        if (allowedFormats.length && allowedFormats.indexOf(file.type) === -1) {
             alert('Formato no permitido: ' + file.type);
             fileInput.value = '';
             return;
@@ -168,9 +210,29 @@
     container.addEventListener('click', function (e) {
         var cell = e.target.closest('.grid-cell');
         if (!cell) return;
-        activeCell = cell;
-        fileInput.click();
+        if (cell.classList.contains('has-image')) {
+            Fancybox.show([{ src: cell.dataset.fullUrl }]);
+        } else {
+            activeCell = cell;
+            fileInput.click();
+        }
     });
+
+    /* =========================================
+       Utilidad: dataURL a Blob
+       ========================================= */
+
+    function dataURLtoBlob(dataURL) {
+        var parts = dataURL.split(',');
+        var mime = parts[0].match(/:(.*?);/)[1];
+        var bstr = atob(parts[1]);
+        var n = bstr.length;
+        var u8arr = new Uint8Array(n);
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new Blob([u8arr], { type: mime });
+    }
 
     /* =========================================
        Modal de recorte
@@ -189,7 +251,7 @@
     }
 
     function showCropUI(img, targetCell, fileType) {
-        var RATIO = STAMP_CROP_RATIO.w / STAMP_CROP_RATIO.h;
+        var RATIO = cropRatio.w / cropRatio.h;
 
         // Overlay
         var overlay = document.createElement('div');
@@ -210,8 +272,8 @@
         cropBox.className = 'crop-container';
         cropBox.style.width = frameW + 'px';
         cropBox.style.height = frameH + 'px';
-        cropBox.style.alignItems = 'flex-start';  // Cambiar de center a flex-start
-        cropBox.style.justifyContent = 'flex-start';  // Cambiar de center a flex-start
+        cropBox.style.alignItems = 'flex-start';
+        cropBox.style.justifyContent = 'flex-start';
 
         // Imagen: escalar para que cubra el frame
         var scale = Math.max(frameW / img.naturalWidth, frameH / img.naturalHeight);
@@ -379,19 +441,17 @@
             ctx.drawImage(img, 0, 0, imgW, imgH);
 
             // Calcular la posición real del crop frame en coordenadas del canvas
-            // Ahora la imagen está posicionada desde la esquina superior izquierda
-            // por lo que el frame comienza en (0, 0) dentro de la imagen transformada
             var extractX = Math.max(0, imgX * dpr);
             var extractY = Math.max(0, imgY * dpr);
             var extractW = Math.min(frameW * dpr, imgW * dpr - extractX);
             var extractH = Math.min(frameH * dpr, imgH * dpr - extractY);
-            
+
             // Crear un nuevo canvas para el resultado recortado
             var cropCanvas = document.createElement('canvas');
             cropCanvas.width = extractW;
             cropCanvas.height = extractH;
             var cropCtx = cropCanvas.getContext('2d');
-            
+
             // Dibujar solo la parte recortada
             cropCtx.drawImage(
                 canvas,
@@ -399,19 +459,54 @@
                 0, 0, extractW, extractH
             );
 
-            var dataURL = cropCanvas.toDataURL(fileType || 'image/jpeg', 0.92);
+            var dataURL = cropCanvas.toDataURL('image/webp', 0.90);
 
-            // Insertar imagen en la celda
-            var existingImg = targetCell.querySelector('img.cell-image');
-            if (existingImg) {
-                existingImg.src = dataURL;
-            } else {
-                var newImg = document.createElement('img');
-                newImg.className = 'cell-image';
-                newImg.src = dataURL;
-                targetCell.classList.add('has-image');
-                targetCell.appendChild(newImg);
+            // Obtener datos para la subida
+            var cellNumber = parseInt(targetCell.dataset.cell);
+            if (!journalId) {
+                alert('Error: ID del journal no disponible.');
+                cleanup();
+                return;
             }
+
+            // Subir al servidor
+            var blob = dataURLtoBlob(dataURL);
+            var formData = new FormData();
+            formData.append('file', blob, cellNumber + '.webp');
+            formData.append('number', cellNumber);
+            formData.append('journal_id', journalId);
+
+            targetCell.classList.add('uploading');
+
+            if (!uploadUrl) {
+                alert('Error: URL de subida no disponible.');
+                cleanup();
+                return;
+            }
+
+            fetch(uploadUrl, {
+                method: 'POST',
+                body: formData
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (response) {
+                targetCell.classList.remove('uploading');
+                if (response.success) {
+                    var newImg = document.createElement('img');
+                    newImg.className = 'cell-image';
+                    newImg.src = response.thumb_url;
+                    newImg.alt = 'Sello ' + cellNumber;
+                    targetCell.dataset.fullUrl = response.full_url;
+                    targetCell.classList.add('has-image');
+                    targetCell.appendChild(newImg);
+                } else {
+                    alert('Error al subir la imagen: ' + (response.message || 'Error desconocido'));
+                }
+            })
+            .catch(function () {
+                targetCell.classList.remove('uploading');
+                alert('Error de conexión al subir la imagen.');
+            });
 
             cleanup();
         });

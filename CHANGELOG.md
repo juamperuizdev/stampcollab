@@ -1,5 +1,13 @@
 # STAMPCOLLAB - CHANGELOG
 
+## 0.0.2 (2026-07-28)
+
+- Collaborative upload of stamps in the frontend
+- Save the stamps to public/uploads/
+- Webp thumbs from the image uploaded
+- Save the stamp to the database
+- Dinamic treatment of the journals
+
 ## 0.0.1 (2026-07-25)
 
 - Codeigniter `4.7.4` framework

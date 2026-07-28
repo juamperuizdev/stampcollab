@@ -14,6 +14,7 @@ return array(
     'App\\Controllers\\BaseController' => $baseDir . '/app/Controllers/BaseController.php',
     'App\\Controllers\\Home' => $baseDir . '/app/Controllers/Home.php',
     'App\\Controllers\\Page' => $baseDir . '/app/Controllers/Page.php',
+    'App\\Controllers\\Stamp' => $baseDir . '/app/Controllers/Stamp.php',
     'App\\Filters\\AuthFilter' => $baseDir . '/app/Filters/AuthFilter.php',
     'App\\Models\\AdministratorModel' => $baseDir . '/app/Models/AdministratorModel.php',
     'App\\Models\\JournalModel' => $baseDir . '/app/Models/JournalModel.php',

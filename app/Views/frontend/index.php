@@ -5,11 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?? 'StampCollab' ?></title>
-    <!--<link rel="shortcut icon" type="image/webp" href="/assets/logo/stampcollab.webp">-->
+    <!--<link rel="shortcut icon" type="image/webp" href="/assets/logo/stampcollab.webp">-->    
 
-    <!-- Bulma CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
-    <link rel="stylesheet" href="<?= base_url('public/assets/css/journal.css') ?>">
+    <!-- Frontend libraries -->
+    <?= view('frontend/scripts-frontend') ?>
 
 </head>
 <body>
@@ -20,43 +19,40 @@
                 <img src="<?= base_url('public/assets/logo/stampcollab.webp') ?>" alt="StampCollab" class="logo-img">
             </a>
             <nav class="header-nav">
-                <a href="#" class="nav-link nav-about">about</a>
-                <a href="#" class="nav-link nav-journals">journals</a>
+                <a href="<?= base_url('about/') ?>" class="nav-link nav-about">about</a>
+                <!--<a href="" class="nav-link nav-journals">journals</a>-->
             </nav>
         </div>
     </header>
 
-    <main class="journal-container">
+    <?php if (!isset($journal)): ?>
 
-        <div class="journal-spread" id="journalSpread" data-page="1">
+        <div class="box m-6 has-text-centered">There is no journal available at this moment</div>
 
-            <button class="page-corner page-corner-prev hidden"
-                    id="btnPrev" title="Página anterior">
-                <span class="corner-icon">&#9664;</span>
-            </button>
+    <?php else: ?>
 
-            <div id="gridContainer"></div>
+        <main class="journal-container">
 
-            <!-- Hoja que gira durante la animación -->
-            <div class="page-flip" id="pageFlip"></div>
+            <div class="journal-spread" id="journalSpread" data-page="1" data-journal-id="<?= $journal->id ?>">
 
-            <button class="page-corner page-corner-next" id="btnNext" title="Siguiente página">
-                <span class="corner-icon">&#9654;</span>
-            </button>
+                <button class="page-corner page-corner-prev hidden" id="btnPrev" title="Página anterior"><span class="corner-icon">&#9664;</span></button>
 
-        </div>
+                <div id="gridContainer"></div>
 
-        <div class="page-indicator" id="pageIndicator">
-            <span></span>
-        </div>
-        
-    </main>
+                <!-- Hoja que gira durante la animación -->
+                <div class="page-flip" id="pageFlip"></div>
 
-    <script>
-        var STAMP_ALLOWED_FORMATS = <?= json_encode(STAMP_ALLOWED_FORMATS) ?>;
-        var STAMP_CROP_RATIO = { w: 21, h: 25 };
-    </script>
-    <script src="<?= base_url('public/assets/js/journal.js') ?>"></script>
+                <button class="page-corner page-corner-next" id="btnNext" title="Siguiente página"><span class="corner-icon">&#9654;</span></button>
+
+            </div>
+
+            <div class="page-indicator" id="pageIndicator"><span></span></div>
+            
+        </main>
+
+        <script src="<?= base_url('public/assets/js/journal.js') ?>"></script>
+
+    <?php endif; ?>
 
 </body>
 </html>

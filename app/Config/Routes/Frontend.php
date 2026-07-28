@@ -7,5 +7,7 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Home::index');
 
 // Carga de páginas por javascript
-$routes->get('page/(:num)', 'Page::getPage/$1');
-//$routes->get('api/cells/(:num)', 'Page::cells/$1');
+$routes->get('page/(:num)/(:num)', 'Page::getPage/$2/$1');
+
+// Subida de imagen de sello
+$routes->post('upload/stamp', 'Stamp::upload');

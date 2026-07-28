@@ -6,41 +6,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?? 'Admin' ?></title>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
-    <script src="https://code.jquery.com/jquery-4.0.0.min.js" integrity="sha256-OaVG6prZf4v69dPg6PhVattBXkcOWQB62pdZ3ORyrao=" crossorigin="anonymous"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.0/css/all.min.css" integrity="sha512-ApSLB1Pd3/bZN8fWB/RG9YhN/7bd9Hkf3AGaE2mPfebjrxagjuBtx2GcgdqIlJkUzwylBo61r9Xa9NmgBI0swA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-    <style>
-        html { background-color: #f5f5f5; }
-        .sidebar { width: 240px; min-height: 100vh; background-color: #363636; position: fixed; top: 0; left: 0; z-index: 10; }
-        .sidebar a { color: #dbdbdb; display: block; padding: 0.75rem 1.25rem; transition: background-color 0.2s; }
-        .sidebar a:hover, .sidebar a.is-active { background-color: #4a4a4a; color: #fff; }
-        .sidebar .menu-label { color: #7a7a7a; padding: 0.75rem 1.25rem 0.25rem; text-transform: uppercase; font-size: 0.75rem; }
-        .sidebar .admin-user { padding: 1.25rem; color: #dbdbdb; border-bottom: 1px solid #4a4a4a; }
-        .main-content { margin-left: 240px; padding: 1.5rem 2rem; }
-    </style>
+    <?= view('backend/layouts/scripts') ?>    
 
 </head>
 <body>
 
 <aside class="sidebar">
+
     <div class="admin-user">
-        <strong><?= esc(session('administrator')->name) ?> <?= esc(session('administrator')->surname) ?></strong>
+        <?= esc(session('administrator')->name) ?> <?= esc(session('administrator')->surname) ?>
     </div>
+
     <nav class="menu">
-        <p class="menu-label">General</p>
-        <a href="<?= base_url('/admin/dashboard/') ?>" class="<?= ($title ?? '') === 'Dashboard' ? 'is-active' : '' ?>">Dashboard</a>
-        <p class="menu-label">Gestión</p>
-        <a href="<?= base_url('/admin/administrators/') ?>" class="<?= ($title ?? '') === 'Administradores' ? 'is-active' : '' ?>">Administradores</a>
-        <a href="<?= base_url('/admin/journals/') ?>" class="<?= ($title ?? '') === 'Journals' ? 'is-active' : '' ?>">Journals</a>
-        <a href="<?= base_url('/admin/stamps/') ?>" class="<?= ($title ?? '') === 'Stamps' ? 'is-active' : '' ?>">Stamps</a>
-        <p class="menu-label">Sesión</p>
-        <a href="<?= base_url('/admin/logout/') ?>">Cerrar sesión</a>
+        <p class="menu-label">Backend</p>
+        <a href="<?= base_url('admin/dashboard/') ?>" class="<?= ($title ?? '') === 'Dashboard' ? 'is-active' : '' ?>">Dashboard</a>
+        <a href="<?= base_url('admin/administrators/') ?>" class="<?= ($title ?? '') === 'Administradores' ? 'is-active' : '' ?>">Administradores</a>
+        <a href="<?= base_url('admin/journals/') ?>" class="<?= ($title ?? '') === 'Journals' ? 'is-active' : '' ?>">Journals</a>
+        <a href="<?= base_url('admin/stamps/') ?>" class="<?= ($title ?? '') === 'Stamps' ? 'is-active' : '' ?>">Stamps</a>
+        <a href="<?= base_url('admin/logout/') ?>">Cerrar sesión</a>
     </nav>
+
 </aside>
 
 <div class="main-content">
+    
     <?php if (session()->getFlashdata('success')): ?>
         <div class="notification is-success is-light">
             <?= session()->getFlashdata('success') ?>
@@ -54,9 +43,9 @@
     <?php if (session()->getFlashdata('errors')): ?>
         <div class="notification is-danger is-light">
             <ul>
-            <?php foreach (session()->getFlashdata('errors') as $err): ?>
-                <li><?= esc($err) ?></li>
-            <?php endforeach; ?>
+                <?php foreach (session()->getFlashdata('errors') as $err): ?>
+                    <li><?= esc($err) ?></li>
+                <?php endforeach; ?>
             </ul>
         </div>
     <?php endif; ?>

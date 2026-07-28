@@ -9,6 +9,8 @@ use App\Models\StampModel;
 
 class Page extends BaseController {
 
+    public string $uploadFolder = 'public/uploads/journals/';
+
     /**
      * Get the page of the journal in frontend by ajax petition
      * @author Juampe Ruiz
@@ -38,8 +40,8 @@ class Page extends BaseController {
                 if ($s->image) {
                     $stamps[] = [
                         'number'    => $s->number,
-                        'thumb_url' => base_url('public/uploads/' . $journal->id . '/thumbs/' . $s->image),
-                        'full_url'  => base_url('public/uploads/' . $journal->id . '/' . $s->image),
+                        'thumb_url' => base_url($this->uploadFolder . $journal->id . '/thumbs/' . $s->image),
+                        'full_url'  => base_url($this->uploadFolder . $journal->id . '/' . $s->image),
                     ];
                 }
             }

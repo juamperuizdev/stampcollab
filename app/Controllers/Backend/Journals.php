@@ -2,8 +2,11 @@
 
 namespace App\Controllers\Backend;
 use App\Controllers\BaseController;
+use CodeIgniter\HTTP\ResponseInterface;
 
 class Journals extends BaseController {
+
+    public string $uploadFolder = 'public/uploads/journals/';
 
     /**
      * Display a listing of journals
@@ -53,12 +56,18 @@ class Journals extends BaseController {
 
         if (!$this->validate($rules)) { return redirect()->back()->withInput()->with('errors', $this->validator->getErrors()); }
 
-        (new \App\Models\JournalModel())->save([
-            'slug'        => mb_url_title($this->request->getPost('name'), '-', true),
-            'name'        => $this->request->getPost('name'),
-            'description' => $this->request->getPost('description'),
-            'status'      => $this->request->getPost('status') ?? 'HIDDEN',
+        $model = new \App\Models\JournalModel();
+        $model->save([
+            'slug'        => mb_url_title(request()->getPost('name'), '-', true),
+            'name'        => request()->getPost('name'),
+            'description' => request()->getPost('description'),
+            'status'      => request()->getPost('status') ?? 'HIDDEN',
+            'pages'       => request()->getPost('pages') ?? 0,
+            'stamps'      => request()->getPost('stamps') ?? 0,
+            'cover'       => request()->getPost('cover'),
         ]);
+
+        $this->moveCover($model->insertID());
 
         return redirect()->to('admin/journals/')->with('success', 'Journal creado');
     }
@@ -69,22 +78,82 @@ class Journals extends BaseController {
      * @version 1.0
      */
     public function update(int $id) {
+
         $rules = [
-            'slug' => "required|alpha_dash|is_unique[journal.slug,id,{$id}]",
             'name' => 'required|max_length[100]',
         ];
 
         if (!$this->validate($rules)) { return redirect()->back()->withInput()->with('errors', $this->validator->getErrors()); }
 
-        (new \App\Models\JournalModel())->save([
+        $data = [
             'id'          => $id,
-            'slug'        => mb_url_title($this->request->getPost('name'), '-', true),
-            'name'        => $this->request->getPost('name'),
-            'description' => $this->request->getPost('description'),
-            'status'      => $this->request->getPost('status') ?? 'HIDDEN',
+            'slug'        => mb_url_title(request()->getPost('name'), '-', true),
+            'name'        => request()->getPost('name'),
+            'description' => request()->getPost('description'),
+            'status'      => request()->getPost('status') ?? 'HIDDEN',
+            'pages'       => request()->getPost('pages') ?? 0,
+            'stamps'      => request()->getPost('stamps') ?? 0,
+        ];
+
+        $cover = request()->getPost('cover');
+        if ($cover) { $data['cover'] = $cover; }
+
+        (new \App\Models\JournalModel())->save($data);
+        $this->moveCover($id);
+        return redirect()->to('admin/journals/')->with('success', 'Journal actualizado');
+
+    }
+
+    /**
+     * Upload a cover to a journal
+     * @author Juampe Ruiz
+     * @version 1.0
+     */
+    public function uploadCover(): ResponseInterface {
+
+        try {
+
+            $file = request()->getFile('cover');
+            if (!$file || !$file->isValid()) {throw new \Exception('No se recibió ninguna imagen válida'); }
+            if (!in_array($file->getMimeType(), STAMP_ALLOWED_FORMATS)) { throw new \Exception('Formato de imagen no permitido'); }
+
+            $uploadPath = ROOTPATH . 'public/uploads/tmp';
+            if (! is_dir($uploadPath)) { mkdir($uploadPath, 0755, true); }
+
+            $filename = $file->getRandomName();
+            $file->move($uploadPath, $filename);
+
+            return response()->setJSON([
+                'success'  => true,
+                'filename' => $filename,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->setJSON([ 'success' => false, 'message' => $e->getMessage() ]);
+            
+        }
+        
+    }
+
+    /**
+     * Delete the cover of a journal
+     * @author Juampe Ruiz
+     * @version 1.0
+     */
+    public function deleteCover(int $id) : ResponseInterface {
+
+        $journal = (new \App\Models\JournalModel())->where('id', $id)->first();
+        if (!$journal || !$journal->cover) { return response()->setJSON(['success' => false, 'message' => 'No hay portada que eliminar']); }
+
+        $filePath = ROOTPATH . 'public/uploads/' . $id . '/' . $journal->cover;
+        if (file_exists($filePath)) { unlink($filePath); }
+
+        (new \App\Models\JournalModel())->save([
+            'id'    => $id,
+            'cover' => null,
         ]);
 
-        return redirect()->to('admin/journals/')->with('success', 'Journal actualizado');
+        return response()->setJSON(['success' => true]);
     }
 
     /**
@@ -95,6 +164,31 @@ class Journals extends BaseController {
     public function delete(int $id) {
         (new \App\Models\JournalModel())->delete($id);
         return redirect()->to('admin/journals/')->with('success', 'Journal eliminado');
+    }
+
+    /**
+     * Move the cover to the journal folder
+     * @author Juampe Ruiz
+     * @version 1.0
+     */
+    private function moveCover(int $id): void {
+
+        $tmpFilename = request()->getPost('cover');
+        if (!$tmpFilename) return;
+
+        $tmpPath = ROOTPATH . 'public/uploads/tmp/' . $tmpFilename;
+        if (!file_exists($tmpPath)) return;
+
+        $destDir = ROOTPATH . $this->uploadFolder . $id;
+        if (!is_dir($destDir)) { mkdir($destDir, 0755, true); }
+
+        $destPath = $destDir . '/cover.webp';
+        rename($tmpPath, $destPath);
+
+        (new \App\Models\JournalModel())->save([
+            'id'    => $id,
+            'cover' => 'cover.webp',
+        ]);
     }
 
 }

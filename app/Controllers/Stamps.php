@@ -5,9 +5,9 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
 
-class Stamp extends BaseController {
+class Stamps extends BaseController {
     
-    public string $uploadFolder = ROOTPATH . 'public/uploads/';
+    public string $uploadFolder = ROOTPATH . 'public/uploads/journals/';
 
     public function upload(): ResponseInterface {
 
@@ -92,8 +92,8 @@ class Stamp extends BaseController {
                 $stampId = $MyModel->insert($data);
             }
 
-            $thumbUrl = base_url('public/uploads/' . $journalId . '/thumbs/' . $filename);
-            $fullUrl  = base_url('public/uploads/' . $journalId . '/' . $filename);
+            $thumbUrl = base_url('public/uploads/journals/' . $journalId . '/thumbs/' . $filename);
+            $fullUrl  = base_url('public/uploads/journals/' . $journalId . '/' . $filename);
 
             return response()->setJSON([
                 'success'   => true,

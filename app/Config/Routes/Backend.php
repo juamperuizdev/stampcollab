@@ -14,7 +14,10 @@ $routes->group('admin', static function ($routes) {
     
     // Routes for CRUD operations
     $routes->resource('administrators', ['controller' => 'Backend\Administrators']);
+    $routes->post('journals/upload-cover', 'Backend\Journals::uploadCover');
+    $routes->post('journals/(:num)/delete-cover', 'Backend\Journals::deleteCover/$1');
     $routes->resource('journals', ['controller' => 'Backend\Journals']);
+    $routes->get('stamps/by-journal/(:num)', 'Backend\Stamps::byJournal/$1');
     $routes->resource('stamps', ['controller' => 'Backend\Stamps']);
 
 });

@@ -1,5 +1,5 @@
 <section class="section">
-        
+
     <div class="level mb-6">
         <div class="level-left">
             <h1 class="title">Stamps</h1>
@@ -9,48 +9,77 @@
         </div>
     </div>
 
-    <div class="box">
-        <table class="table is-fullwidth is-striped is-hoverable">
+    <?php if (isset($journals)): ?>
+        <div class="field">
+            <label class="label">Filtrar por journal</label>
+            <div class="control">
+                <div class="select">
+                    <select id="journalFilter" onchange="loadStamps(this.value)">
+                        <?php foreach ($journals as $journal): ?>
+                            <option value="<?= $journal->id ?>" <?= $journal->id === $selected ? 'selected' : '' ?>>
+                                <?= esc($journal->name) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
 
-            <thead>
-                <tr>
-                    <th class="is-narrow has-text-centered">ID</th>
-                    <th>Journal</th>
-                    <th class="is-narrow has-text-centered">Número</th>
-                    <th class="is-narrow has-text-centered">Estado</th>
-                    <th class="is-narrow has-text-centered">Acciones</th>
-                </tr>
-            </thead>
+    <div class="columns is-multiline mt-4" id="stampsGrid">
 
-            <tbody>
+        <?php if (empty($stamps)): ?>
 
-                <?php if (empty($stamps)): ?>
+            <div class="column">
+                <p class="has-text-centered has-text-grey">No hay stamps en este journal</p>
+            </div>
 
-                    <tr><td colspan="99" class="has-text-centered">No hay stamps</td></tr>
-                <?php else: ?>
+        <?php else: ?>
 
-                    <?php foreach ($stamps as $stamp): ?>
+            <?php foreach ($stamps as $stamp):
+                $imageUrl = $stamp->image ? base_url('public/uploads/journals/' . $stamp->id_journal . '/thumbs/' . $stamp->image) : base_url('public/assets/image/stamp.png');
+                $statusClass = $stamp->status ? 'is-success' : 'is-danger';
+                $statusLabel = $stamp->status ? 'Activo' : 'Inactivo';
+                ?>
 
-                        <tr>
-                            <td class="has-text-centered"><?= $stamp->id ?></td>
-                            <td><?= $stamp->journal ?></td>
-                            <td class="has-text-centered"><?= $stamp->number ?? '-' ?></td>
-                            <td class="has-text-centered"><span class="tag is-medium <?= $stamp->status ? 'is-success' : 'is-danger' ?>"><?= $stamp->status ? 'Activo' : 'Inactivo' ?></span></td>
-                            <td class="has-text-centered">
-                                <a href="<?= base_url("admin/stamps/{$stamp->id}/edit/") ?>" class="button is-small is-dark is-inline-block"><span class="icon"><i class="fa-solid fa-pen"></i></span></a>
-                                <form method="POST" action="<?= base_url("admin/stamps/{$stamp->id}") ?>" class="is-inline-block" onsubmit="return confirm('¿Eliminar este stamp?')">
-                                    <input type="hidden" name="_method" value="DELETE">
-                                    <button class="button is-small is-danger"><span class="icon"><i class="fa-solid fa-trash"></i></span></button>
-                                </form>
-                            </td>
-                        </tr>
+                <div class="column is-1">
+                    <div class="box has-text-centered p-3" style="position:relative">
+                        <a href="<?= base_url("admin/stamps/{$stamp->id}/edit/") ?>">
+                            <img src="<?= $imageUrl ?>" alt="Stamp" style="width:100%;aspect-ratio:21/25;object-fit:contain;display:block">
+                        </a>
+                        <span class="tag is-light is-small" style="position:absolute;top:0.5rem;right:0.5rem">#<?= $stamp->number ?? '?' ?></span>
+                        <p class="mt-2"><span class="tag is-fullwidth <?= $statusClass ?>"><?= $statusLabel ?></span></p>
+                        <div class="buttons is-centered mt-2" style="gap:0.25rem">
+                            <a href="<?= base_url("admin/stamps/{$stamp->id}/edit/") ?>" class="button is-small is-dark"><span class="icon"><i class="fa-solid fa-pen"></i></span></a>
+                            <form method="POST" action="<?= base_url("admin/stamps/{$stamp->id}") ?>" class="is-inline-block" onsubmit="return confirm('¿Eliminar este stamp?')">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button class="button is-small is-danger"><span class="icon"><i class="fa-solid fa-trash"></i></span></button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
 
-                    <?php endforeach; ?>
+            <?php endforeach; ?>
 
-                <?php endif; ?>
+        <?php endif; ?>
 
-            </tbody>
-        </table>
     </div>
 
 </section>
+
+<script>
+
+    function loadStamps(journalId) {
+        if (!journalId) return;
+
+        $.ajax({
+            url: '<?= base_url('admin/stamps/by-journal/') ?>' + journalId,
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                document.getElementById('stampsGrid').innerHTML = data.html;
+            }
+        });
+    }
+
+</script>

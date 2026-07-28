@@ -10,4 +10,4 @@ $routes->get('/', 'Home::index');
 $routes->get('page/(:num)/(:num)', 'Page::getPage/$2/$1');
 
 // Subida de imagen de sello
-$routes->post('upload/stamp', 'Stamp::upload');
+$routes->post('upload/stamp', 'Stamps::upload');

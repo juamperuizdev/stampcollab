@@ -4,8 +4,7 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $title ?? 'StampCollab' ?></title>
-    <!--<link rel="shortcut icon" type="image/webp" href="/assets/logo/stampcollab.webp">-->    
+    <title><?= $title ?? 'StampCollab' ?></title>    
 
     <!-- Frontend libraries -->
     <?= view('frontend/scripts-frontend') ?>

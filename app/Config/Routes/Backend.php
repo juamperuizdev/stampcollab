@@ -8,6 +8,7 @@ $routes->group('admin', static function ($routes) {
     $routes->post('login', 'Backend\Auth::attemptLogin');
     $routes->get('logout', 'Backend\Auth::logout');
     $routes->get('dashboard', 'Backend\Dashboard::index', [ 'filter' => 'AuthFilter' ]);
+    $routes->get('dashboard/test-email', 'Backend\Dashboard::testEmail', ['filter' => 'AuthFilter']);
     $routes->get('/', 'Backend\Auth::login');
 
     $routes->post('administrators/(:num)/toggle-status', 'Backend\Administrators::toggleStatus/$1');

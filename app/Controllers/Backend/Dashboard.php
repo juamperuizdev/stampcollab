@@ -21,5 +21,31 @@ class Dashboard extends BaseController {
 
         return view('backend/layouts/header', $data) . view('backend/dashboard/index') . view('backend/layouts/footer');
     }
+
+    /**
+     * Send a test email via configured SMTP (Brevo)
+     * @author Juampe Ruiz
+     * @version 1.0
+     */
+    public function testEmail() {
+
+        $email = \Config\Services::email();
+        $email->setTo(getenv('email.webmasterMail'));
+        $email->setSubject('[StampCollab] Test de email');
+        $email->setMessage(
+            '<html><body style="font-family:sans-serif;padding:20px;">'
+            . '<h1 style="color:#485fc7;">Test StampCollab</h1>'
+            . '<p>Este es un email de prueba enviado desde el panel de administracion.</p>'
+            . '<hr><p style="color:#888;font-size:12px;">StampCollab</p>'
+            . '</body></html>'
+        );
+
+        if ($email->send()) {
+            return redirect()->to('admin/dashboard/')->with('success', 'Email de prueba enviado correctamente a ' . getenv('email.webmasterMail'));
+        }
+
+        log_message('error', 'Error al enviar email: ' . $email->printDebugger(['headers']));
+        return redirect()->to('admin/dashboard/')->with('error', 'Error al enviar el email. Revisa los logs.');
+    }
     
 }

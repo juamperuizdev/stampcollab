@@ -92,3 +92,4 @@ defined('STAMP_ALLOWED_FORMATS') || define('STAMP_ALLOWED_FORMATS', [
     'image/tiff',
     'image/svg+xml',
 ]);
+

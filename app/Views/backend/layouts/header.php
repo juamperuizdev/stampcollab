@@ -23,6 +23,7 @@
         <a href="<?= base_url('admin/administrators/') ?>" class="<?= ($title ?? '') === 'Administradores' ? 'is-active' : '' ?>">Administradores</a>
         <a href="<?= base_url('admin/journals/') ?>" class="<?= ($title ?? '') === 'Journals' ? 'is-active' : '' ?>">Journals</a>
         <a href="<?= base_url('admin/stamps/') ?>" class="<?= ($title ?? '') === 'Stamps' ? 'is-active' : '' ?>">Stamps</a>
+        <a href="<?= base_url('admin/dashboard/test-email') ?>">Test Email</a>
         <a href="<?= base_url('admin/logout/') ?>">Cerrar sesión</a>
     </nav>
 

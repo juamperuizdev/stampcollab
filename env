@@ -50,6 +50,20 @@
 # database.tests.port = 3306
 
 #--------------------------------------------------------------------
+# EMAIL
+#--------------------------------------------------------------------
+
+# email.protocol = 'smtp'
+# email.fromEmail = 'your@email.com'
+# email.fromName = 'your name'
+# email.mailType = 'html'
+# email.SMTPHost = 'your smtp.com'
+# email.SMTPUser = 'your user'
+# email.SMTPPass = 'your password'
+# email.SMTPPort = '587'
+# email.webmasterMail = 'your mail'
+
+#--------------------------------------------------------------------
 # ENCRYPTION
 #--------------------------------------------------------------------
 

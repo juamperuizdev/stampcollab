@@ -95,6 +95,8 @@ class Stamps extends BaseController {
             $thumbUrl = base_url('public/uploads/journals/' . $journalId . '/thumbs/' . $filename);
             $fullUrl  = base_url('public/uploads/journals/' . $journalId . '/' . $filename);
 
+            $this->sendNotificationEmail($journal->name, $thumbUrl, $data['ip'], $data['user_agent']);
+
             return response()->setJSON([
                 'success'   => true,
                 'stamp_id'  => $stampId,
@@ -108,6 +110,41 @@ class Stamps extends BaseController {
 
     }
 
+    /**
+     * Send a mail notification to webmaster about the new stamp published
+     * @param string $journalName Name of the journal
+     * @param string $thumbUrl URL of the thumbnail
+     * @param string $ip IP address of the user who published the stamp
+     * @param string $userAgent User agent of the user who published the stamp
+     * @author Juampe Ruiz
+     * @version 1.0
+     */
+    private function sendNotificationEmail(string $journalName, string $thumbUrl, string $ip, string $userAgent): void {
+        
+        $html = view('mail/stamp_notification', [
+            'journalName' => $journalName,
+            'thumbUrl'    => $thumbUrl,
+            'ip'          => $ip,
+            'userAgent'   => $userAgent,
+        ]);
+
+        $email = \Config\Services::email();
+        $email->setTo(getenv('email.webmasterMail'));
+        $email->setSubject('[StampCollab] Nuevo stamp en ' . $journalName);
+        $email->setMessage($html);
+
+        if (!$email->send()) { log_message('error', 'Error al enviar notificacion de stamp: ' . $email->printDebugger(['headers'])); }
+
+    }
+
+    /**
+     * Create a GD image from a file
+     * @param string $filePath Path to the file
+     * @param string $mimeType Mime type of the file
+     * @return \GdImage|false GD image or false if the file type is not supported
+     * @author Juampe Ruiz
+     * @version 1.0
+     */
     private function createImageFromFile(string $filePath, string $mimeType)/*: \GdImage|false*/ {
         return match ($mimeType) {
             'image/jpeg' => @imagecreatefromjpeg($filePath),

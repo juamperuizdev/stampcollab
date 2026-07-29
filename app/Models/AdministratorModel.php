@@ -5,7 +5,7 @@ use CodeIgniter\Model;
 
 class AdministratorModel extends Model {
 
-    protected $table            = 'administrator';
+    protected $table            = 'sta_administrator';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'object';

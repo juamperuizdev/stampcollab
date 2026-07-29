@@ -129,7 +129,7 @@ class Stamps extends BaseController {
         ]);
 
         $email = \Config\Services::email();
-        $email->setTo(getenv('email.webmasterMail'));
+        $email->setTo(env('email.webmasterMail', ''));
         $email->setSubject('[StampCollab] Nuevo stamp en ' . $journalName);
         $email->setMessage($html);
 

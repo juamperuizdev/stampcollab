@@ -29,8 +29,14 @@ class Dashboard extends BaseController {
      */
     public function testEmail() {
 
+        $webmasterMail = env('email.webmasterMail', '');
+
+        if ($webmasterMail === '') {
+            return redirect()->to('admin/dashboard/')->with('error', 'La variable de entorno email.webmasterMail no está configurada.');
+        }
+
         $email = \Config\Services::email();
-        $email->setTo(getenv('email.webmasterMail'));
+        $email->setTo($webmasterMail);
         $email->setSubject('[StampCollab] Test de email');
         $email->setMessage(
             '<html><body style="font-family:sans-serif;padding:20px;">'
@@ -41,7 +47,7 @@ class Dashboard extends BaseController {
         );
 
         if ($email->send()) {
-            return redirect()->to('admin/dashboard/')->with('success', 'Email de prueba enviado correctamente a ' . getenv('email.webmasterMail'));
+            return redirect()->to('admin/dashboard/')->with('success', 'Email de prueba enviado correctamente a ' . $webmasterMail);
         }
 
         log_message('error', 'Error al enviar email: ' . $email->printDebugger(['headers']));

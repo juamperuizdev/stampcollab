@@ -5,7 +5,7 @@ use CodeIgniter\Model;
 
 class StampModel extends Model {
 
-    protected $table            = 'stamp';
+    protected $table            = 'sta_stamp';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'object';

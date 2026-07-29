@@ -5,7 +5,7 @@ use CodeIgniter\Model;
 
 class JournalModel extends Model {
 
-    protected $table            = 'journal';
+    protected $table            = 'sta_journal';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'object';

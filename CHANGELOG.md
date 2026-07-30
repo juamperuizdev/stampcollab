@@ -2,7 +2,7 @@
 
 ## 0.0.4 (2026-07-30)
 
-- Convert to base64 images in mail views.
+- Upgrades in sending mails.
 
 ## 0.0.3 (2026-07-29)
 

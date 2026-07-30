@@ -15,7 +15,6 @@
                 <table role="presentation" align="center" width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
                     <tr>
                         <td style="padding:30px;background:#7fdbd3;text-align:center;">
-                            <?php $base64 = base64_encode(file_get_contents(ROOTPATH . 'public/assets/logo/stampcollab.webp')); ?>
-                            <img src="data:image/webp;base64,<?= $base64 ?>" alt="StampCollab" style="max-width:500px;height:auto;" />
+                            <img src="<?= base_url('public/assets/logo/stampcollab.webp') ?>" alt="StampCollab" style="max-width:500px;height:auto;" />
                         </td>
                     </tr>

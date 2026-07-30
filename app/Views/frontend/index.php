@@ -49,6 +49,8 @@
             
         </main>
 
+        <?= view('frontend/preloader') ?>
+
         <script src="<?= base_url('public/assets/js/journal.js') ?>"></script>
 
     <?php endif; ?>

@@ -219,6 +219,20 @@
     });
 
     /* =========================================
+       Preloader
+       ========================================= */
+
+    var preloader = document.getElementById('preloader');
+
+    function showPreloader() {
+        if (preloader) preloader.style.display = 'flex';
+    }
+
+    function hidePreloader() {
+        if (preloader) preloader.style.display = 'none';
+    }
+
+    /* =========================================
        Utilidad: dataURL a Blob
        ========================================= */
 
@@ -476,9 +490,10 @@
             formData.append('number', cellNumber);
             formData.append('journal_id', journalId);
 
-            targetCell.classList.add('uploading');
+            showPreloader();
 
             if (!uploadUrl) {
+                hidePreloader();
                 alert('Error: URL de subida no disponible.');
                 cleanup();
                 return;
@@ -490,7 +505,7 @@
             })
             .then(function (r) { return r.json(); })
             .then(function (response) {
-                targetCell.classList.remove('uploading');
+                hidePreloader();
                 if (response.success) {
                     var newImg = document.createElement('img');
                     newImg.className = 'cell-image';
@@ -504,7 +519,7 @@
                 }
             })
             .catch(function () {
-                targetCell.classList.remove('uploading');
+                hidePreloader();
                 alert('Error de conexión al subir la imagen.');
             });
 

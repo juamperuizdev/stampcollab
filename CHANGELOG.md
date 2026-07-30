@@ -3,6 +3,7 @@
 ## 0.0.4 (2026-07-30)
 
 - Upgrades in sending mails.
+- Preloader CSS animation.
 
 ## 0.0.3 (2026-07-29)
 

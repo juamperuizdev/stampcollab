@@ -1,5 +1,9 @@
 # STAMPCOLLAB - CHANGELOG
 
+## 0.0.4 (2026-07-30)
+
+- Convert to base64 images in mail views.
+
 ## 0.0.3 (2026-07-29)
 
 - Anonymised webmaster email to `.env` via `email.webmasterMail` config property

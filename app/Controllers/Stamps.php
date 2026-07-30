@@ -123,7 +123,8 @@ class Stamps extends BaseController {
         
         $html = view('mail/stamp_notification', [
             'journalName' => $journalName,
-            'thumbUrl'    => $thumbUrl,
+            //'thumbUrl'    => $thumbUrl,
+            'thumbUrl'    => base64_encode(file_get_contents($thumbUrl)),
             'ip'          => $ip,
             'userAgent'   => $userAgent,
         ]);

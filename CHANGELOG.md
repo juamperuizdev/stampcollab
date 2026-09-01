@@ -1,5 +1,9 @@
 # STAMPCOLLAB - CHANGELOG
 
+## 0.0.5 (2026-07-30)
+
+- Upgrade composer.
+
 ## 0.0.4 (2026-07-30)
 
 - Upgrades in sending mails.

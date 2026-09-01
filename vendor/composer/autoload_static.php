@@ -50,6 +50,7 @@ class ComposerStaticInitf5cce40800fa5dae1504b9364f585e6a
     );
 
     public static $classMap = array (
+        'App\\Controllers\\About' => __DIR__ . '/../..' . '/app/Controllers/About.php',
         'App\\Controllers\\Backend\\Administrators' => __DIR__ . '/../..' . '/app/Controllers/Backend/Administrators.php',
         'App\\Controllers\\Backend\\Auth' => __DIR__ . '/../..' . '/app/Controllers/Backend/Auth.php',
         'App\\Controllers\\Backend\\Dashboard' => __DIR__ . '/../..' . '/app/Controllers/Backend/Dashboard.php',
@@ -58,7 +59,7 @@ class ComposerStaticInitf5cce40800fa5dae1504b9364f585e6a
         'App\\Controllers\\BaseController' => __DIR__ . '/../..' . '/app/Controllers/BaseController.php',
         'App\\Controllers\\Home' => __DIR__ . '/../..' . '/app/Controllers/Home.php',
         'App\\Controllers\\Page' => __DIR__ . '/../..' . '/app/Controllers/Page.php',
-        'App\\Controllers\\Stamp' => __DIR__ . '/../..' . '/app/Controllers/Stamp.php',
+        'App\\Controllers\\Stamps' => __DIR__ . '/../..' . '/app/Controllers/Stamps.php',
         'App\\Filters\\AuthFilter' => __DIR__ . '/../..' . '/app/Filters/AuthFilter.php',
         'App\\Models\\AdministratorModel' => __DIR__ . '/../..' . '/app/Models/AdministratorModel.php',
         'App\\Models\\JournalModel' => __DIR__ . '/../..' . '/app/Models/JournalModel.php',

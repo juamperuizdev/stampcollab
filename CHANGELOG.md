@@ -1,6 +1,10 @@
 # STAMPCOLLAB - CHANGELOG
 
-## 0.0.5 (2026-07-30)
+## 0.0.6 (2026-09-02)
+
+- Added Google Analytics Tag
+
+## 0.0.5 (2026-08-31)
 
 - Upgrade composer.
 

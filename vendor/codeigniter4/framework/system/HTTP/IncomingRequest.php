@@ -44,8 +44,6 @@ use stdClass;
  * - Query string arguments (generally via $_GET, or as parsed via parse_str())
  * - Upload files, if any (as represented by $_FILES)
  * - Deserialized body binds (generally from $_POST)
- *
- * @see \CodeIgniter\HTTP\IncomingRequestTest
  */
 class IncomingRequest extends Request
 {
@@ -105,14 +103,14 @@ class IncomingRequest extends Request
     /**
      * Stores the valid locale codes.
      *
-     * @var array
+     * @var list<string>
      */
     protected $validLocales = [];
 
     /**
      * Holds the old data from a redirect.
      *
-     * @var array
+     * @var array<string, mixed>
      */
     protected $oldInput = [];
 
@@ -142,7 +140,7 @@ class IncomingRequest extends Request
             // php://input is not available with enctype="multipart/form-data".
             // See https://www.php.net/manual/en/wrappers.php.php#wrappers.php.input
             && ! str_contains($this->getHeaderLine('Content-Type'), 'multipart/form-data')
-            && (int) $this->getHeaderLine('Content-Length') <= $this->getPostMaxSize()
+            && (int) $this->getHeaderLine('Content-Length') <= $this->getPostMaxSize((string) ini_get('post_max_size'))
         ) {
             // Get our body from php://input
             $body = file_get_contents('php://input');
@@ -169,16 +167,16 @@ class IncomingRequest extends Request
         $this->detectLocale($config);
     }
 
-    private function getPostMaxSize(): int
+    /**
+     * Converts the `post_max_size` ini value to bytes.
+     *
+     * A value of 0 or less means unlimited.
+     */
+    private function getPostMaxSize(string $postMaxSize): int
     {
-        $postMaxSize = ini_get('post_max_size');
+        $bytes = ini_parse_quantity($postMaxSize);
 
-        return match (strtoupper(substr($postMaxSize, -1))) {
-            'G'     => (int) str_replace('G', '', $postMaxSize) * 1024 ** 3,
-            'M'     => (int) str_replace('M', '', $postMaxSize) * 1024 ** 2,
-            'K'     => (int) str_replace('K', '', $postMaxSize) * 1024,
-            default => (int) $postMaxSize,
-        };
+        return $bytes <= 0 ? PHP_INT_MAX : $bytes;
     }
 
     /**
@@ -203,12 +201,12 @@ class IncomingRequest extends Request
     /**
      * Provides a convenient way to work with the Negotiate class
      * for content negotiation.
+     *
+     * @param list<string> $supported
      */
     public function negotiate(string $type, array $supported, bool $strictMatch = false): string
     {
-        if ($this->negotiator === null) {
-            $this->negotiator = Services::negotiator($this, true);
-        }
+        $this->negotiator ??= Services::negotiator($this, true);
 
         return match (strtolower($type)) {
             'media'    => $this->negotiator->media($supported, $strictMatch),
@@ -276,11 +274,28 @@ class IncomingRequest extends Request
             return false;
         }
 
-        if ($this->hasHeader('X-Forwarded-Proto') && $this->header('X-Forwarded-Proto')->getValue() === 'https') {
-            return true;
+        if ($this->hasHeader('X-Forwarded-Proto')) {
+            $proto = $this->header('X-Forwarded-Proto')->getValue();
+
+            // A single value may be a string or a one-element array. Multiple
+            // values are ambiguous and cannot be trusted, so they are ignored.
+            if (is_array($proto)) {
+                $proto = count($proto) === 1 ? reset($proto) : null;
+            }
+
+            if (is_string($proto) && strtolower(trim($proto)) === 'https') {
+                return true;
+            }
         }
 
-        return $this->hasHeader('Front-End-Https') && ! empty($this->header('Front-End-Https')->getValue()) && strtolower($this->header('Front-End-Https')->getValue()) !== 'off';
+        if (! $this->hasHeader('Front-End-Https')) {
+            return false;
+        }
+
+        $frontEndHttps = $this->header('Front-End-Https')->getValue();
+
+        return is_string($frontEndHttps) && ! in_array($frontEndHttps, ['', '0'], true)
+            && strtolower($frontEndHttps) !== 'off';
     }
 
     /**
@@ -332,6 +347,8 @@ class IncomingRequest extends Request
     /**
      * Set the valid locales.
      *
+     * @param list<string> $locales
+     *
      * @return $this
      */
     public function setValidLocales(array $locales)
@@ -363,11 +380,11 @@ class IncomingRequest extends Request
      * to grab data from the request object and can be used in lieu of the
      * other get* methods in most cases.
      *
-     * @param array|string|null $index
-     * @param int|null          $filter Filter constant
-     * @param array|int|null    $flags
+     * @param list<string>|string|null      $index
+     * @param int|null                      $filter Filter constant
+     * @param array<string, mixed>|int|null $flags
      *
-     * @return array<int|string, mixed>|bool|float|int|stdClass|string|null
+     * @return array<array-key, mixed>|bool|float|int|stdClass|string|null
      */
     public function getVar($index = null, $filter = null, $flags = null)
     {
@@ -394,7 +411,7 @@ class IncomingRequest extends Request
      *
      * @see http://php.net/manual/en/function.json-decode.php
      *
-     * @return array<int|string, mixed>|bool|float|int|stdClass|null
+     * @return ($assoc is true ? array<array-key, mixed>|bool|float|int|string|null : array<array-key, mixed>|bool|float|int|stdClass|string|null)
      *
      * @throws HTTPException When the body is invalid as JSON.
      */
@@ -416,12 +433,12 @@ class IncomingRequest extends Request
     /**
      * Get a specific variable from a JSON input stream
      *
-     * @param array|string|null $index  The variable that you want which can use dot syntax for getting specific values.
-     * @param bool              $assoc  If true, return the result as an associative array.
-     * @param int|null          $filter Filter Constant
-     * @param array|int|null    $flags  Option
+     * @param list<string>|string|null      $index  The variable that you want which can use dot syntax for getting specific values.
+     * @param bool                          $assoc  If true, return the result as an associative array.
+     * @param int|null                      $filter Filter Constant
+     * @param array<string, mixed>|int|null $flags  Option
      *
-     * @return array<int|string, mixed>|bool|float|int|stdClass|string|null
+     * @return ($assoc is true ? array<array-key, mixed>|bool|float|int|string|null : array<array-key, mixed>|bool|float|int|stdClass|string|null)
      */
     public function getJsonVar($index = null, bool $assoc = false, ?int $filter = null, $flags = null)
     {
@@ -496,7 +513,7 @@ class IncomingRequest extends Request
      * A convenience method that grabs the raw input stream(send method in PUT, PATCH, DELETE) and decodes
      * the String into an array.
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function getRawInput()
     {
@@ -508,9 +525,9 @@ class IncomingRequest extends Request
     /**
      * Gets a specific variable from raw input stream (send method in PUT, PATCH, DELETE).
      *
-     * @param array|string|null $index  The variable that you want which can use dot syntax for getting specific values.
-     * @param int|null          $filter Filter Constant
-     * @param array|int|null    $flags  Option
+     * @param list<string>|string|null      $index  The variable that you want which can use dot syntax for getting specific values.
+     * @param int|null                      $filter Filter Constant
+     * @param array<string, mixed>|int|null $flags  Option
      *
      * @return mixed
      */
@@ -562,9 +579,9 @@ class IncomingRequest extends Request
     /**
      * Fetch an item from GET data.
      *
-     * @param array|string|null $index  Index for item to fetch from $_GET.
-     * @param int|null          $filter A filter name to apply.
-     * @param array|int|null    $flags
+     * @param list<string>|string|null      $index  Index for item to fetch from $_GET.
+     * @param int|null                      $filter A filter name to apply.
+     * @param array<string, mixed>|int|null $flags
      *
      * @return mixed
      */
@@ -576,9 +593,9 @@ class IncomingRequest extends Request
     /**
      * Fetch an item from POST.
      *
-     * @param array|string|null $index  Index for item to fetch from $_POST.
-     * @param int|null          $filter A filter name to apply
-     * @param array|int|null    $flags
+     * @param list<string>|string|null      $index  Index for item to fetch from $_POST.
+     * @param int|null                      $filter A filter name to apply
+     * @param array<string, mixed>|int|null $flags
      *
      * @return mixed
      */
@@ -590,9 +607,9 @@ class IncomingRequest extends Request
     /**
      * Fetch an item from POST data with fallback to GET.
      *
-     * @param array|string|null $index  Index for item to fetch from $_POST or $_GET
-     * @param int|null          $filter A filter name to apply
-     * @param array|int|null    $flags
+     * @param list<string>|string|null      $index  Index for item to fetch from $_POST or $_GET
+     * @param int|null                      $filter A filter name to apply
+     * @param array<string, mixed>|int|null $flags
      *
      * @return mixed
      */
@@ -623,9 +640,9 @@ class IncomingRequest extends Request
     /**
      * Fetch an item from GET data with fallback to POST.
      *
-     * @param array|string|null $index  Index for item to be fetched from $_GET or $_POST
-     * @param int|null          $filter A filter name to apply
-     * @param array|int|null    $flags
+     * @param list<string>|string|null      $index  Index for item to be fetched from $_GET or $_POST
+     * @param int|null                      $filter A filter name to apply
+     * @param array<string, mixed>|int|null $flags
      *
      * @return mixed
      */
@@ -656,9 +673,9 @@ class IncomingRequest extends Request
     /**
      * Fetch an item from the COOKIE array.
      *
-     * @param array|string|null $index  Index for item to be fetched from $_COOKIE
-     * @param int|null          $filter A filter name to be applied
-     * @param array|int|null    $flags
+     * @param list<string>|string|null      $index  Index for item to be fetched from $_COOKIE
+     * @param int|null                      $filter A filter name to be applied
+     * @param array<string, mixed>|int|null $flags
      *
      * @return mixed
      */
@@ -682,7 +699,7 @@ class IncomingRequest extends Request
      * with redirect_with_input(). It first checks for the data in the old
      * POST data, then the old GET data and finally check for dot arrays
      *
-     * @return array|string|null
+     * @return array<array-key, mixed>|string|null
      */
     public function getOldInput(string $key)
     {
@@ -734,12 +751,12 @@ class IncomingRequest extends Request
     /**
      * Returns an array of all files that have been uploaded with this
      * request. Each file is represented by an UploadedFile instance.
+     *
+     * @return array<string, array<array-key, UploadedFile>|UploadedFile>
      */
     public function getFiles(): array
     {
-        if ($this->files === null) {
-            $this->files = new FileCollection();
-        }
+        $this->files ??= new FileCollection();
 
         return $this->files->all(); // return all files
     }
@@ -748,13 +765,11 @@ class IncomingRequest extends Request
      * Verify if a file exist, by the name of the input field used to upload it, in the collection
      * of uploaded files and if is have been uploaded with multiple option.
      *
-     * @return array|null
+     * @return list<UploadedFile>|null
      */
     public function getFileMultiple(string $fileID)
     {
-        if ($this->files === null) {
-            $this->files = new FileCollection();
-        }
+        $this->files ??= new FileCollection();
 
         return $this->files->getFileMultiple($fileID);
     }
@@ -767,9 +782,7 @@ class IncomingRequest extends Request
      */
     public function getFile(string $fileID)
     {
-        if ($this->files === null) {
-            $this->files = new FileCollection();
-        }
+        $this->files ??= new FileCollection();
 
         return $this->files->getFile($fileID);
     }

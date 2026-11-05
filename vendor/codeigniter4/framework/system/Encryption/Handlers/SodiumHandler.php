@@ -20,8 +20,10 @@ use SodiumException;
 /**
  * SodiumHandler uses libsodium in encryption.
  *
+ * @property-read int         $blockSize
+ * @property-read string|null $key
+ *
  * @see https://github.com/jedisct1/libsodium/issues/392
- * @see \CodeIgniter\Encryption\Handlers\SodiumHandlerTest
  */
 class SodiumHandler extends BaseHandler
 {
@@ -56,7 +58,7 @@ class SodiumHandler extends BaseHandler
             }
         }
 
-        if (empty($key) || strlen((string) $key) !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES) {
+        if (! is_string($key) || strlen($key) !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES) {
             throw EncryptionException::forNeedsStarterKey();
         }
 
@@ -92,7 +94,7 @@ class SodiumHandler extends BaseHandler
             }
         }
 
-        if (empty($key) || strlen((string) $key) !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES) {
+        if (! is_string($key) || strlen($key) !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES) {
             throw EncryptionException::forNeedsStarterKey();
         }
 
@@ -124,7 +126,7 @@ class SodiumHandler extends BaseHandler
     /**
      * Parse the $params before doing assignment.
      *
-     * @param array|string|null $params
+     * @param array<string, mixed>|string|null $params
      *
      * @return void
      *

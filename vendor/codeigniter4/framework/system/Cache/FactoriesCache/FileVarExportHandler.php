@@ -13,9 +13,18 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Cache\FactoriesCache;
 
-final class FileVarExportHandler
+final readonly class FileVarExportHandler
 {
-    private string $path = WRITEPATH . 'cache';
+    private string $path;
+
+    /**
+     * @param string|null $path The directory where the cache files are stored.
+     *                          Defaults to the "writable/cache" directory.
+     */
+    public function __construct(?string $path = null)
+    {
+        $this->path = rtrim($path ?? WRITEPATH . 'cache', '/');
+    }
 
     public function save(string $key, mixed $val): void
     {
@@ -23,7 +32,7 @@ final class FileVarExportHandler
 
         // Two processes may try to create the directory at the same time.
         // is_dir() confirms it exists, so suppressing the warning is safe.
-        if (! is_dir($this->path) && ! @mkdir($this->path, 0777, true) && ! is_dir($this->path)) {
+        if (! is_dir($this->path) && ! @mkdir($this->path, 0755, true) && ! is_dir($this->path)) {
             log_message('error', 'FactoriesCache: cannot create cache directory: ' . $this->path);
 
             return;
@@ -36,6 +45,8 @@ final class FileVarExportHandler
 
             return;
         }
+
+        @chmod($tmp, 0644);
 
         // Another process may have wiped the directory. Clean up on failure.
         if (! @rename($tmp, $this->path . "/{$key}")) {

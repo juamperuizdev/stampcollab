@@ -20,7 +20,6 @@ use CodeIgniter\HTTP\ResponseInterface;
  * Requires the ChromeLogger extension installed in your browser.
  *
  * @see https://craig.is/writing/chrome-logger
- * @see \CodeIgniter\Log\Handlers\ChromeLoggerHandlerTest
  */
 class ChromeLoggerHandler extends BaseHandler
 {
@@ -99,8 +98,8 @@ class ChromeLoggerHandler extends BaseHandler
      * will stop. Any handlers that have not run, yet, will not
      * be run.
      *
-     * @param string $level
-     * @param string $message
+     * @param string        $level
+     * @param object|string $message
      */
     public function handle($level, $message): bool
     {

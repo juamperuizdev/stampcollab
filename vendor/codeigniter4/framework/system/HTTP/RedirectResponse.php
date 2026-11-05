@@ -18,8 +18,6 @@ use CodeIgniter\HTTP\Exceptions\HTTPException;
 
 /**
  * Handle a redirect response
- *
- * @see \CodeIgniter\HTTP\RedirectResponseTest
  */
 class RedirectResponse extends Response
 {
@@ -47,7 +45,8 @@ class RedirectResponse extends Response
      * Sets the URI to redirect to but as a reverse-routed or named route
      * instead of a raw URI.
      *
-     * @param string $route Route name or Controller::method
+     * @param string           $route  Route name or Controller::method
+     * @param list<int|string> $params
      *
      * @return $this
      *
@@ -108,8 +107,6 @@ class RedirectResponse extends Response
      * If the validation has any errors, transmit those back
      * so they can be displayed when the validation is handled
      * within a method different than displaying the form.
-     *
-     * @return $this
      */
     private function withErrors(): self
     {
@@ -125,7 +122,8 @@ class RedirectResponse extends Response
     /**
      * Adds a key and message to the session as Flashdata.
      *
-     * @param array|string $message
+     * @param array|string                   $message
+     * @param array<array-key, mixed>|string $message
      *
      * @return $this
      */

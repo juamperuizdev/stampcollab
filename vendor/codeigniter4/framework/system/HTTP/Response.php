@@ -29,8 +29,6 @@ use Config\Cookie as CookieConfig;
  * - Status code and reason phrase
  * - Headers
  * - Message body
- *
- * @see \CodeIgniter\HTTP\ResponseTest
  */
 class Response extends Message implements ResponseInterface
 {
@@ -39,7 +37,7 @@ class Response extends Message implements ResponseInterface
     /**
      * HTTP status codes
      *
-     * @var array
+     * @var array<int, string>
      */
     protected static $statusCodes = [
         // 1xx: Informational
@@ -197,7 +195,7 @@ class Response extends Message implements ResponseInterface
      */
     public function getStatusCode(): int
     {
-        if (empty($this->statusCode)) {
+        if ($this->statusCode === 0) {
             throw HTTPException::forMissingResponseStatus();
         }
 
@@ -221,7 +219,7 @@ class Response extends Message implements ResponseInterface
     public function getReasonPhrase()
     {
         if ($this->reason === '') {
-            return empty($this->statusCode) ? '' : static::$statusCodes[$this->statusCode];
+            return $this->statusCode === 0 ? '' : static::$statusCodes[$this->statusCode];
         }
 
         return $this->reason;

@@ -22,8 +22,6 @@ use Stringable;
 
 /**
  * Abstraction for a uniform resource identifier (URI).
- *
- * @see \CodeIgniter\HTTP\URITest
  */
 class URI implements Stringable
 {
@@ -541,7 +539,7 @@ class URI implements Stringable
      */
     public function getFragment(): string
     {
-        return $this->fragment ?? '';
+        return $this->fragment;
     }
 
     /**
@@ -697,9 +695,7 @@ class URI implements Stringable
     {
         $parts = parse_url($str);
 
-        if (! isset($parts['path'])) {
-            $parts['path'] = $this->getPath();
-        }
+        $parts['path'] ??= $this->getPath();
 
         if (! isset($parts['host']) && $parts['path'] !== '') {
             $parts['host'] = $parts['path'];
@@ -917,9 +913,10 @@ class URI implements Stringable
      * A convenience method to pass an array of items in as the Query
      * portion of the URI.
      *
-     * @return URI
-     *
      * @TODO: PSR-7: Should be `withQueryParams(array $query)`
+     * @param array<string, mixed> $query
+     *
+     * @return URI
      */
     public function setQueryArray(array $query)
     {

@@ -1,5 +1,9 @@
 # STAMPCOLLAB - CHANGELOG
 
+## 0.0.7 (2026-11-05)
+
+- Codeigniter `4.7.6` framework
+
 ## 0.0.6 (2026-09-02)
 
 - Added Google Analytics Tag

@@ -19,8 +19,6 @@ use ReflectionMethod;
 
 /**
  * Reads a controller and returns a list of auto route listing.
- *
- * @see \CodeIgniter\Commands\Utilities\Routes\AutoRouterImproved\ControllerMethodReaderTest
  */
 final readonly class ControllerMethodReader
 {
@@ -45,7 +43,7 @@ final readonly class ControllerMethodReader
      *
      * @param class-string $class
      *
-     * @return list<array<string, array|string>>
+     * @return list<array{method: string, route: string, route_params: string, handler: string, params: array<string, bool>}>
      */
     public function read(string $class, string $defaultController = 'Home', string $defaultMethod = 'index'): array
     {
@@ -128,6 +126,9 @@ final readonly class ControllerMethodReader
         return $output;
     }
 
+    /**
+     * @return array{array<string, bool>, string}
+     */
     private function getParameters(ReflectionMethod $method): array
     {
         $params      = [];

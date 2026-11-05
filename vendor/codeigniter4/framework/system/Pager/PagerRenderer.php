@@ -21,8 +21,6 @@ use CodeIgniter\HTTP\URI;
  * This class is passed to the view that describes the pagination,
  * and is used to get the link information and provide utility
  * methods needed to work with pagination.
- *
- * @see \CodeIgniter\Pager\PagerRendererTest
  */
 class PagerRenderer
 {
@@ -101,7 +99,16 @@ class PagerRenderer
     protected ?int $perPageEnd = null;
 
     /**
-     * Constructor.
+     * @param array{
+     *   uri: URI,
+     *   pageCount: int,
+     *   currentPage: int,
+     *   total: int|null,
+     *   segment?: int,
+     *   pageSelector?: string,
+     *   perPage?: int|null,
+     *   ...<string, mixed>
+     * } $details
      */
     public function __construct(array $details)
     {

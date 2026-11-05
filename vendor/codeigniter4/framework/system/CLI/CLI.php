@@ -27,8 +27,6 @@ use Throwable;
  * Some of the code in this class is Windows-specific, and not
  * possible to test using travis-ci. It has been phpunit-annotated
  * to prevent messing up code coverage.
- *
- * @see \CodeIgniter\CLI\CLITest
  */
 class CLI
 {
@@ -254,15 +252,19 @@ class CLI
             $default = $options[0];
         }
 
-        static::fwrite(STDOUT, $field . (trim($field) !== '' ? ' ' : '') . $extraOutput . ': ');
         static::$lastWrite = 'write';
 
-        // Read the input from keyboard.
-        $input = trim(static::$io->input());
-        $input = ($input === '') ? (string) $default : $input;
+        // The reader renders the prompt itself, so readline redraws repaint it instead of erasing it.
+        $prompt = sprintf('%s%s%s: ', $field, trim($field) !== '' ? ' ' : '', $extraOutput);
+        $input  = trim(static::$io->input($prompt));
+        $input  = $input === '' ? (string) $default : $input;
 
         if ($validation !== []) {
             while (! static::validate('"' . trim($field) . '"', $input, $validation)) {
+                if (static::$io->isAtEnd()) {
+                    throw CLIException::forInputEnded();
+                }
+
                 $input = static::prompt($field, $options, $validation);
             }
         }
@@ -273,10 +275,10 @@ class CLI
     /**
      * prompt(), but based on the option's key
      *
-     * @param list<string>|string       $text       Output "field" text or an one or two value array where the first value is the text before listing the options
-     *                                              and the second value the text before asking to select one option. Provide empty string to omit
-     * @param array<int|string, string> $options    A list of options (array(key => description)), the first option will be the default value
-     * @param list<string>|string|null  $validation Validation rules
+     * @param list<string>|string      $text       Output "field" text or an one or two value array where the first value is the text before listing the options
+     *                                             and the second value the text before asking to select one option. Provide empty string to omit
+     * @param array<array-key, string> $options    A list of options (array(key => description)), the first option will be the default value
+     * @param list<string>|string|null $validation Validation rules
      *
      * @return string The selected key of $options
      */
@@ -302,71 +304,52 @@ class CLI
     /**
      * This method is the same as promptByKey(), but this method supports multiple keys, separated by commas.
      *
-     * @param string                    $text    Output "field" text or an one or two value array where the first value is the text before listing the options
-     *                                           and the second value the text before asking to select one option. Provide empty string to omit
-     * @param array<int|string, string> $options A list of options (array(key => description)), the first option will be the default value
+     * @param string                   $text    Output "field" text or an one or two value array where the first value is the text before listing the options
+     *                                          and the second value the text before asking to select one option. Provide empty string to omit
+     * @param array<array-key, string> $options A list of options (array(key => description)), the first option will be the default value
      *
-     * @return array<int|string, string> The selected key(s) and value(s) of $options
+     * @return array<array-key, string> The selected key(s) and value(s) of $options
      */
     public static function promptByMultipleKeys(string $text, array $options): array
     {
         CLI::isZeroOptions($options);
 
-        $extraOutputDefault = static::color('0', 'green');
-        $opts               = $options;
-        unset($opts[0]);
+        $default = (string) array_key_first($options);
+        $others  = $options;
+        unset($others[$default]);
 
-        if ($opts === []) {
-            $extraOutput = $extraOutputDefault;
-        } else {
-            $optsKey     = array_keys($opts);
-            $extraOutput = '[' . $extraOutputDefault . ', ' . implode(', ', $optsKey) . ']';
-            $extraOutput = 'You can specify multiple values separated by commas.' . PHP_EOL . $extraOutput;
+        $field = static::color($default, 'green');
+
+        if ($others !== []) {
+            $field = sprintf(
+                'You can specify multiple values separated by commas.%s[%s, %s]',
+                PHP_EOL,
+                $field,
+                implode(', ', array_keys($others)),
+            );
         }
 
         CLI::write($text);
         CLI::printKeysAndValues($options);
         CLI::newLine();
 
-        $input = static::prompt($extraOutput);
-        $input = ($input === '') ? '0' : $input; // 0 is default
-
-        // validation
         while (true) {
-            $pattern = preg_match_all('/^\d+(,\d+)*$/', trim($input));
+            $input = static::prompt($field);
+            $input = $input === '' ? $default : $input;
+            $keys  = array_map(intval(...), explode(',', $input));
 
-            // separate input by comma and convert all to an int[]
-            $inputToArray = array_map(static fn ($value): int => (int) $value, explode(',', $input));
-            // find max from key of $options
-            $maxOptions = array_key_last($options);
-            // find max from input
-            $maxInput = max($inputToArray);
-
-            // return the prompt again if $input contain(s) non-numeric character, except a comma.
-            // And if max from $options less than max from input,
-            // it means user tried to access null value in $options
-            if ($pattern < 1 || $maxOptions < $maxInput) {
-                static::error('Please select correctly.');
-                CLI::newLine();
-
-                $input = static::prompt($extraOutput);
-                $input = ($input === '') ? '0' : $input;
-            } else {
-                break;
+            if (preg_match('/^\d+(,\d+)*$/', $input) === 1 && array_diff($keys, array_keys($options)) === []) {
+                return array_intersect_key($options, array_flip($keys));
             }
-        }
 
-        $input = [];
+            static::error('Please select correctly.');
 
-        foreach ($options as $key => $description) {
-            foreach ($inputToArray as $inputKey) {
-                if ($key === $inputKey) {
-                    $input[$key] = $description;
-                }
+            if (static::$io->isAtEnd()) {
+                throw CLIException::forInputEnded();
             }
-        }
 
-        return $input;
+            CLI::newLine();
+        }
     }
 
     // --------------------------------------------------------------------
@@ -376,7 +359,7 @@ class CLI
     /**
      * Validation for $options in promptByKey() and promptByMultipleKeys(). Return an error if $options is an empty array.
      *
-     * @param array<int|string, string> $options
+     * @param array<array-key, string> $options
      */
     private static function isZeroOptions(array $options): void
     {
@@ -388,7 +371,7 @@ class CLI
     /**
      * Print each key and value one by one
      *
-     * @param array<int|string, string> $options
+     * @param array<array-key, string> $options
      */
     private static function printKeysAndValues(array $options): void
     {
@@ -481,7 +464,7 @@ class CLI
         // Check color support for STDERR
         $stdout = static::$isColored;
 
-        static::$isColored = static::hasColorSupport(STDERR);
+        static::$isColored = is_cli() && static::hasColorSupport(STDERR);
 
         if ($foreground !== '' || (string) $background !== '') {
             $text = static::color($text, $foreground, $background);
@@ -493,7 +476,7 @@ class CLI
             static::$lastWrite = 'write';
         }
 
-        static::fwrite(STDERR, $text . PHP_EOL);
+        static::fwrite(is_cli() ? STDERR : STDOUT, $text . PHP_EOL);
 
         // return STDOUT color support
         static::$isColored = $stdout;
@@ -572,7 +555,7 @@ class CLI
     {
         // Unix systems, and Windows with VT100 Terminal support (i.e. Win10)
         // can handle CSI sequences. For lower than Win10 we just shove in 40 new lines.
-        is_windows() && ! static::streamSupports('sapi_windows_vt100_support', STDOUT)
+        is_windows() && is_cli() && ! static::streamSupports('sapi_windows_vt100_support', STDOUT)
             ? static::newLine(40)
             : static::fwrite(STDOUT, "\033[H\033[2J");
     }
@@ -741,7 +724,7 @@ class CLI
             static::generateDimensions();
         }
 
-        return static::$width ?: $default;
+        return (static::$width === null || static::$width === 0) ? $default : static::$width;
     }
 
     /**
@@ -753,7 +736,7 @@ class CLI
             static::generateDimensions();
         }
 
-        return static::$height ?: $default;
+        return (static::$height === null || static::$height === 0) ? $default : static::$height;
     }
 
     /**
@@ -819,7 +802,7 @@ class CLI
         if ($thisStep !== false) {
             // Don't allow div by zero or negative numbers....
             $thisStep   = abs($thisStep);
-            $totalSteps = $totalSteps < 1 ? 1 : $totalSteps;
+            $totalSteps = max(1, $totalSteps);
 
             $percent = (int) (($thisStep / $totalSteps) * 100);
             $step    = (int) round($percent / 10);
@@ -1029,8 +1012,8 @@ class CLI
     /**
      * Returns a well formatted table
      *
-     * @param list<array<int|string, mixed>> $tbody List of rows
-     * @param list<string>                   $thead List of columns
+     * @param list<array<array-key, mixed>> $tbody List of rows
+     * @param list<string>                  $thead List of columns
      *
      * @return void
      */

@@ -7,43 +7,43 @@ namespace Composer\Autoload;
 class ComposerStaticInitf5cce40800fa5dae1504b9364f585e6a
 {
     public static $prefixLengthsPsr4 = array (
-        'P' =>
+        'P' => 
         array (
             'Psr\\Log\\' => 8,
         ),
-        'L' =>
+        'L' => 
         array (
             'Laminas\\Escaper\\' => 16,
         ),
-        'C' =>
+        'C' => 
         array (
             'Config\\' => 7,
             'CodeIgniter\\' => 12,
         ),
-        'A' =>
+        'A' => 
         array (
             'App\\' => 4,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Psr\\Log\\' =>
+        'Psr\\Log\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/log/src',
         ),
-        'Laminas\\Escaper\\' =>
+        'Laminas\\Escaper\\' => 
         array (
             0 => __DIR__ . '/..' . '/laminas/laminas-escaper/src',
         ),
-        'Config\\' =>
+        'Config\\' => 
         array (
             0 => __DIR__ . '/../..' . '/app/Config',
         ),
-        'CodeIgniter\\' =>
+        'CodeIgniter\\' => 
         array (
             0 => __DIR__ . '/..' . '/codeigniter4/framework/system',
         ),
-        'App\\' =>
+        'App\\' => 
         array (
             0 => __DIR__ . '/../..' . '/app',
         ),

@@ -18,8 +18,6 @@ use CodeIgniter\Images\Exceptions\ImageException;
 
 /**
  * Encapsulation of an Image file
- *
- * @see \CodeIgniter\Images\ImageTest
  */
 class Image extends File
 {
@@ -75,7 +73,7 @@ class Image extends File
 
         $targetName ??= $this->getFilename();
 
-        if (empty($targetName)) {
+        if ($targetName === '') {
             throw ImageException::forInvalidFile($targetName);
         }
 
@@ -97,7 +95,7 @@ class Image extends File
      *
      * A helper function that gets info about the file
      *
-     * @return array|bool
+     * @return array{width: int, height: int, image_type: int, size_str: string, mime_type: string}|bool
      */
     public function getProperties(bool $return = false)
     {

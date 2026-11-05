@@ -129,7 +129,7 @@ abstract class BaseModel
 
     /**
      * Determines whether the model should protect field names during
-     * mass assignment operations such as $this->insert(), $this->update().
+     * mass assignment operations such as $this->insert(), $this->update(), $this->replace().
      *
      * When set to `true`, only the fields explicitly defined in the `$allowedFields`
      * property will be allowed for mass assignment. This helps prevent
@@ -142,7 +142,7 @@ abstract class BaseModel
 
     /**
      * An array of field names that are allowed
-     * to be set by the user in inserts/updates.
+     * to be set by the user in inserts/updates/replaces.
      *
      * @var list<string>
      */
@@ -1265,6 +1265,8 @@ abstract class BaseModel
      * @param bool           $returnSQL `true` means SQL is returned, `false` will execute the query.
      *
      * @return BaseResult|false|Query|string
+     *
+     * @throws DataException
      */
     public function replace(?array $row = null, bool $returnSQL = false)
     {
@@ -1273,7 +1275,14 @@ abstract class BaseModel
             return false;
         }
 
-        $row = (array) $row;
+        $row     = (array) $row;
+        $hasData = $row !== [];
+        $row     = $this->doProtectFieldsForReplace($row);
+
+        if ($hasData && $row === []) {
+            throw DataException::forEmptyDataset('replace');
+        }
+
         $row = $this->setCreatedField($row, $this->setDate());
         $row = $this->setUpdatedField($row, $this->setDate());
 
@@ -1415,6 +1424,20 @@ abstract class BaseModel
     }
 
     /**
+     * Protects replacement data before generated timestamps are added.
+     *
+     * @param row_array $row
+     *
+     * @return row_array
+     *
+     * @throws DataException
+     */
+    protected function doProtectFieldsForReplace(array $row): array
+    {
+        return $this->doProtectFields($row);
+    }
+
+    /**
      * Sets the timestamp or current timestamp if null value is passed.
      *
      * @param int|null $userDate An optional PHP timestamp to be converted
@@ -1425,9 +1448,11 @@ abstract class BaseModel
      */
     protected function setDate(?int $userDate = null)
     {
-        $currentDate = $userDate ?? Time::now()->getTimestamp();
+        if ($userDate === null && $this->dateFormat === 'datetime') {
+            return $this->timeToDate(Time::now());
+        }
 
-        return $this->intToDate($currentDate);
+        return $this->intToDate($userDate ?? Time::now()->getTimestamp());
     }
 
     /**
@@ -1648,9 +1673,7 @@ abstract class BaseModel
 
     protected function ensureValidation(): void
     {
-        if ($this->validation === null) {
-            $this->validation = service('validation', null, false);
-        }
+        $this->validation ??= service('validation', null, false);
     }
 
     /**
@@ -1855,7 +1878,7 @@ abstract class BaseModel
      *
      * @param object|row_array|null $row
      *
-     * @return array<int|string, mixed>
+     * @return array<array-key, mixed>
      *
      * @throws DataException
      * @throws InvalidArgumentException
@@ -1947,7 +1970,7 @@ abstract class BaseModel
     /**
      * Provides direct access to method in the database connection.
      *
-     * @param array<int|string, mixed> $params
+     * @param array<array-key, mixed> $params
      *
      * @return mixed
      */

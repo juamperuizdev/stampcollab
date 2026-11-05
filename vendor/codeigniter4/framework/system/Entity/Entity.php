@@ -38,8 +38,6 @@ use UnitEnum;
 
 /**
  * Entity encapsulation, for use with CodeIgniter\Model
- *
- * @see \CodeIgniter\Entity\EntityTest
  */
 class Entity implements JsonSerializable
 {
@@ -421,7 +419,7 @@ class Entity implements JsonSerializable
      * Checks if an array contains only Entity instances.
      * This allows optimization for per-entity change tracking.
      *
-     * @param array<int|string, mixed> $data
+     * @param array<array-key, mixed> $data
      */
     private function containsOnlyEntities(array $data): bool
     {

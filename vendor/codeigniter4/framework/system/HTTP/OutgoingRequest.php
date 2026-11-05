@@ -15,8 +15,6 @@ namespace CodeIgniter\HTTP;
 
 /**
  * Representation of an outgoing, client-side request.
- *
- * @see \CodeIgniter\HTTP\OutgoingRequestTest
  */
 class OutgoingRequest extends Message implements OutgoingRequestInterface
 {
@@ -35,8 +33,9 @@ class OutgoingRequest extends Message implements OutgoingRequestInterface
     protected $uri;
 
     /**
-     * @param string      $method HTTP method
-     * @param string|null $body
+     * @param string                                         $method  HTTP method
+     * @param array<string, array<array-key, string>|string> $headers
+     * @param string|null                                    $body
      */
     public function __construct(
         string $method,
